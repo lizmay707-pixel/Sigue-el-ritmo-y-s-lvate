@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reto Corporal y Ambiental</title>
+    <style>
+        :root {
+            --primary: #2ecc71;
+            --secondary: #3498db;
+            --danger: #e74c3c;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--dark);
+            color: var(--light);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 20px;
+        }
+        #game-container {
+            background: #34495e;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        h1 { margin-top: 0; color: var(--primary); }
+        .badge {
+            background: var(--secondary);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        #instruction-box {
+            font-size: 1.8rem;
+            font-weight: bold;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        /* Animaciones del personaje SVG */
+        svg { width: 220px; height: 260px; overflow: visible; }
+        .limb { transition: transform 0.3s ease; transform-origin: center; }
+        
+        /* Poses */
+        .pose-saltar { animation: jump 0.5s infinite alternate; }
+        .pose-girar { animation: spin 0.8s ease; }
+        .pose-agacharse { transform: translateY(30px) scaleY(0.85); }
+        
+        @keyframes jump {
+            from { transform: translateY(0); }
+            to { transform: translateY(-25px); }
+        }
+        @keyframes spin {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
+        }
+
+        button {
+            background: var(--primary);
+            color: var(--dark);
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 10px;
+            transition: transform 0.1s;
+        }
+        button:hover { transform: scale(1.05); }
+        button:disabled { background: #7f8c8d; cursor: not-allowed; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-blue { background: var(--secondary); color: white; }
+        
+        #qa-modal {
+            background: #1a252f;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid var(--primary);
+            margin-top: 20px;
+            display: none;
+        }
+        .answer-text {
+            color: var(--primary);
+            font-weight: bold;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div class="badge" id="round-badge">Ronda 1 de 3</div>
+    <h1>Escucha y Repite</h1>
+    
+    <!-- Personaje SVG -->
+    <div id="character-stage">
+        <svg id="avatar" viewBox="0 0 200 240">
+            <!-- Cuerpo -->
+            <rect x="70" y="80" width="60" height="80" rx="15" fill="#3498db"/>
+            <!-- Cabeza -->
+            <g id="head">
+                <circle cx="100" cy="45" r="30" fill="#f1c40f"/>
+                <!-- Orejas -->
+                <circle id="ear-left" cx="68" cy="45" r="7" fill="#e67e22"/>
+                <circle id="ear-right" cx="132" cy="45" r="7" fill="#e67e22"/>
+                <!-- Ojos -->
+                <circle cx="90" cy="40" r="4" fill="#2c3e50"/>
+                <circle cx="110" cy="40" r="4" fill="#2c3e50"/>
+                <!-- Nariz -->
+                <circle id="nose" cx="100" cy="48" r="4" fill="#e74c3c"/>
+                <!-- Boca -->
+                <path id="mouth" d="M 90 58 Q 100 65 110 58" stroke="#2c3e50" stroke-width="3" fill="none"/>
+            </g>
+            <!-- Brazo Izquierdo (del personaje) -->
+            <g id="arm-left" style="transform-origin: 65px 90px;">
+                <rect x="45" y="85" width="20" height="60" rx="10" fill="#f1c40f"/>
+            </g>
+            <!-- Brazo Derecho (del personaje) -->
+            <g id="arm-right" style="transform-origin: 135px 90px;">
+                <rect x="135" y="85" width="20" height="60" rx="10" fill="#f1c40f"/>
+            </g>
+            <!-- Piernas -->
+            <g id="legs">
+                <rect id="leg-left" x="75" y="160" width="20" height="60" rx="10" fill="#2980b9"/>
+                <rect id="leg-right" x="105" y="160" width="20" height="60" rx="10" fill="#2980b9"/>
+            </g>
+        </svg>
+    </div>
+
+    <div id="instruction-box">Presiona "Iniciar Juego" para comenzar</div>
+
+    <div id="controls">
+        <button id="btn-start" onclick="startRound()">Iniciar Ronda 1</button>
+        <button id="btn-music" class="btn-blue" onclick="startMusicChallenge()" style="display:none;">🎵 Iniciar Música y Búsqueda</button>
+    </div>
+
+    <!-- Sección de Pregunta Ambiental -->
+    <div id="qa-modal">
+        <h3 id="object-command" style="color: #f1c40f;"></h3>
+        <p id="env-question" style="font-size: 1.2rem;"></p>
+        <button onclick="document.getElementById('env-answer').style.display='block'">Ver Respuesta</button>
+        <p id="env-answer" class="answer-text"></p>
+        <br>
+        <button id="btn-next-round" onclick="nextRound()">Siguiente Ronda ➡️</button>
+    </div>
+</div>
+
+<script>
+    // --- DATOS DEL JUEGO ---
+    const rounds = [
+        [
+            { text: "Tocar nariz", pose: "nose" },
+            { text: "Tocar oreja izquierda", pose: "earLeft" },
+            { text: "Tocar hombro derecho", pose: "shoulderRight" },
+            { text: "Saltar", pose: "jump" },
+            { text: "Tocar cabeza", pose: "head" },
+            { text: "Aplaudir", pose: "clap" },
+            { text: "Tocar rodilla", pose: "knee" },
+            { text: "Girar", pose: "spin" }
+        ],
+        [
+            { text: "Tocar boca", pose: "mouth" },
+            { text: "Mover cuello", pose: "neck" },
+            { text: "Levantar brazos", pose: "armsUp" },
+            { text: "Agacharse", pose: "squat" },
+            { text: "Tocar oreja derecha", pose: "earRight" },
+            { text: "Tocar nariz", pose: "nose" },
+            { text: "Saltar", pose: "jump" },
+            { text: "Aplaudir", pose: "clap" }
+        ],
+        [
+            { text: "Tocar cabeza", pose: "head" },
+            { text: "Levantar brazos", pose: "armsUp" },
+            { text: "Tocar oreja izquierda", pose: "earLeft" },
+            { text: "Tocar nariz", pose: "head" }, // ¡TRAMPA! Dice nariz, toca cabeza
+            { text: "Agacharse", pose: "squat" },
+            { text: "Tocar boca", pose: "mouth" },
+            { text: "Girar", pose: "spin" },
+            { text: "Saltar", pose: "jump" }
+        ]
+    ];
+
+    const searchChallenges = [
+        "¡Corre y trae algo de color VERDE!",
+        "¡Busca un ZAPATO y muéstralo en cámara!",
+        "¡Trae una BOTELLA o vaso reutilizable!"
+    ];
+
+    const envQuestions = [
+        {
+            q: "¿De qué color es la caneca para depositar residuos aprovechables como plástico y cartón limpios?",
+            a: "Color BLANCO."
+        },
+        {
+            q: "¿Qué significa la regla de las 3R en el cuidado ambiental?",
+            a: "Reducir, Reutilizar y Reciclar."
+        },
+        {
+            q: "¿En qué caneca se depositan las cáscaras de frutas y restos de comida?",
+            a: "En la caneca de color VERDE (residuos orgánicos)."
+        }
+    ];
+
+    let currentRound = 0;
+    let isPlaying = false;
+
+    // --- SÍNTESIS DE VOZ ---
+    function speak(text) {
+        return new Promise(resolve => {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'es-ES';
+            utterance.rate = 1.05;
+            utterance.onend = resolve;
+            window.speechSynthesis.speak(utterance);
+        });
+    }
+
+    // --- ANIMACIONES DEL MUÑECO ---
+    function resetPose() {
+        const avatar = document.getElementById('avatar');
+        const armL = document.getElementById('arm-left');
+        const armR = document.getElementById('arm-right');
+        const head = document.getElementById('head');
+        
+        avatar.className = '';
+        armL.style.transform = 'rotate(0deg)';
+        armR.style.transform = 'rotate(0deg)';
+        head.style.transform = 'rotate(0deg)';
+    }
+
+    function applyPose(pose) {
+        resetPose();
+        const avatar = document.getElementById('avatar');
+        const armL = document.getElementById('arm-left');
+        const armR = document.getElementById('arm-right');
+        const head = document.getElementById('head');
+
+        switch(pose) {
+            case 'nose':
+            case 'mouth':
+                armR.style.transform = 'rotate(135deg)';
+                break;
+            case 'earLeft':
+                armL.style.transform = 'rotate(-145deg)';
+                break;
+            case 'earRight':
+                armR.style.transform = 'rotate(145deg)';
+                break;
+            case 'head':
+                armL.style.transform = 'rotate(-160deg)';
+                armR.style.transform = 'rotate(160deg)';
+                break;
+            case 'shoulderRight':
+                armL.style.transform = 'rotate(-90deg)';
+                break;
+            case 'armsUp':
+                armL.style.transform = 'rotate(-170deg)';
+                armR.style.transform = 'rotate(170deg)';
+                break;
+                case 'clap':
+                armL.style.transform = 'rotate(-70deg)';
+                armR.style.transform = 'rotate(70deg)';
+                break;
+                case 'knee':
+            armL.style.transform = 'rotate(-30deg)';
+            armR.style.transform = 'rotate(30deg)';
+
+        case 'jump':
+            avatar.classList.add('pose-saltar');
+            break;
+        case 'spin':
+            avatar.classList.add('pose-girar');
+            break;
+        case 'neck':
+            head.style.transform = 'rotate(20deg)';
+            break;
+    }
+}
+
+// --- LÓGICA DE SECUENCIA (1 a 8) ---
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+async function startRound() {
+    document.getElementById('btn-start').style.display = 'none';
+    const sequence = rounds[currentRound];
+    const box = document.getElementById('instruction-box');
+
+    if (currentRound === 2) {
+        box.innerText = "⚠️ ¡ATENCIÓN! En esta ronda escuchen bien, el muñeco puede hacer trampa...";
+        await speak("Atención. En esta ronda escuchen bien, el muñeco puede hacer trampa.");
+        await sleep(1000);
+    }
+
+    // Bucle acumulativo de 1 hasta 8
+    for (let step = 0; step < sequence.length; step++) {
+        box.innerText = `Memoriza la secuencia (${step + 1}/8)...`;
+        await sleep(800);
+
+        for (let i = 0; i <= step; i++) {
+            const action = sequence[i];
+            box.innerText = action.text;
+            applyPose(action.pose);
+            await speak(action.text);
+            await sleep(350);
+            resetPose();
+            await sleep(200);
+        }
+
+        box.innerText = "¡Tu turno! Haz los movimientos...";
+        await sleep(2000 + (step * 400)); // Da más tiempo según crece la lista
+    }
+
+    box.innerText = "¡Excelente! Ahora prepárense para la música.";
+    await speak("Excelente. Ahora prepárense para la música.");
+    document.getElementById('btn-music').style.display = 'inline-block';
+}
+
+// --- MÚSICA SINTETIZADA Y RETO DE BÚSQUEDA ---
+function playBackgroundBeat(durationMs) {
+    return new Promise(resolve => {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const notes = [261.63, 329.63, 392.00, 523.25, 392.00, 329.63]; // Do Mi Sol Do
+        let noteIndex = 0;
+        
+        const interval = setInterval(() => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(notes[noteIndex % notes.length], ctx.currentTime);
+            
+            gain.gain.setValueAtTime(0.2, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+            
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.25);
+            noteIndex++;
+        }, 300);
+
+        setTimeout(() => {
+            clearInterval(interval);
+            ctx.close();
+            resolve();
+        }, durationMs);
+    });
+}
+
+async function startMusicChallenge() {
+    document.getElementById('btn-music').style.display = 'none';
+    const box = document.getElementById('instruction-box');
+    
+    box.innerText = "🎶 ¡Baila o muévete mientras suena la música! 🎶";
+    applyPose('jump');
+
+    // Tiempo aleatorio entre 5 y 9 segundos
+    const randomTime = Math.floor(Math.random() * 4000) + 5000;
+    await playBackgroundBeat(randomTime);
+    resetPose();
+
+    // Orden de búsqueda
+    const challenge = searchChallenges[currentRound];
+    box.innerText = "🛑 ¡ALTO! " + challenge;
+    await speak("¡Alto! " + challenge);
+
+    // Mostrar modal con pregunta ambiental para el último
+    const qaModal = document.getElementById('qa-modal');
+    const qData = envQuestions[currentRound];
+    
+    document.getElementById('object-command').innerText = "Pregunta para el último en llegar con el objeto:";
+    document.getElementById('env-question').innerText = qData.q;
+    document.getElementById('env-answer').innerText = "Respuesta: " + qData.a;
+    document.getElementById('env-answer').style.display = 'none';
+    
+    if (currentRound === 2) {
+        document.getElementById('btn-next-round').innerText = "Finalizar Juego 🏆";
+    }
+    qaModal.style.display = 'block';
+}
+
+function nextRound() {
+    document.getElementById('qa-modal').style.display = 'none';
+    currentRound++;
+
+    if (currentRound < 3) {
+        document.getElementById('round-badge').innerText = `Ronda ${currentRound + 1} de 3`;
+        document.getElementById('instruction-box').innerText = `Listos para la Ronda ${currentRound + 1}`;
+        const btnStart = document.getElementById('btn-start');
+        btnStart.innerText = `Iniciar Ronda ${currentRound + 1}`;
+        btnStart.style.display = 'inline-block';
+    } else {
+        document.getElementById('round-badge').innerText = "¡Juego Terminado!";
+        document.getElementById('instruction-box').innerText = "🎉 ¡Felicitaciones a todos por participar y cuidar el planeta! 🌍";
+        speak("Felicitaciones a todos por participar y cuidar el planeta.");
+    }
+}
+</script>
+
+</body>
+</html>
