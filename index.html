@@ -57,10 +57,39 @@
         }
         h1 { margin: 5px 0 15px 0; color: var(--primary); font-size: 1.8rem; }
         
+        /* Escenario central (Ícono grande vs Muñeco) */
+        #visual-stage {
+            height: 230px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10px 0;
+        }
+        #body-part-icon {
+            font-size: 8.5rem;
+            line-height: 1;
+            animation: popIn 0.35s ease;
+            user-select: none;
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.4); opacity: 0; }
+            80% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        svg { width: 200px; height: 230px; overflow: visible; display: none; }
+        #arm-left, #arm-right, #head { transition: transform 0.25s ease; }
+        .pose-saltar { animation: jump 0.45s infinite alternate; }
+        .pose-girar { animation: spin 0.7s ease; }
+        .pose-agacharse { transform: translateY(30px) scaleY(0.85); }
+        
+        @keyframes jump { from { transform: translateY(0); } to { transform: translateY(-25px); } }
+        @keyframes spin { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
+
         #instruction-box {
-            font-size: 1.9rem;
+            font-size: 1.75rem;
             font-weight: bold;
-            min-height: 90px;
+            min-height: 95px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -72,26 +101,10 @@
             border: 2px solid rgba(255,255,255,0.05);
         }
         .sub-hint {
-            font-size: 1rem;
-            color: #bdc3c7;
+            font-size: 1.05rem;
+            color: var(--warning);
             font-weight: normal;
-            margin-top: 6px;
-        }
-
-        svg { width: 200px; height: 240px; overflow: visible; }
-        #arm-left, #arm-right, #head { transition: transform 0.25s ease; }
-        
-        .pose-saltar { animation: jump 0.45s infinite alternate; }
-        .pose-girar { animation: spin 0.7s ease; }
-        .pose-agacharse { transform: translateY(30px) scaleY(0.85); }
-        
-        @keyframes jump {
-            from { transform: translateY(0); }
-            to { transform: translateY(-25px); }
-        }
-        @keyframes spin {
-            from { transform: rotateY(0deg); }
-            to { transform: rotateY(360deg); }
+            margin-top: 8px;
         }
 
         button {
@@ -104,7 +117,7 @@
             border-radius: 12px;
             cursor: pointer;
             margin: 8px;
-            transition: transform 0.15s, background 0.2s;
+            transition: transform 0.15s;
         }
         button:hover { transform: scale(1.04); }
         .btn-blue { background: var(--secondary); color: white; }
@@ -131,11 +144,15 @@
 <div id="game-container">
     <div class="header-bar">
         <span class="badge" id="round-badge">Ronda 1 de 3</span>
-        <span class="step-counter" id="step-counter">Paso: 0 / 8</span>
+        <span class="step-counter" id="step-counter">Parte: 0 / 8</span>
     </div>
     <h1>Escucha, Memoriza y Actúa</h1>
     
-    <div id="character-stage">
+    <div id="visual-stage">
+        <!-- Imagen/Ícono grande para las primeras 7 partes -->
+        <div id="body-part-icon">🧠</div>
+
+        <!-- Muñeco SVG (aparece solo en la parte 8) -->
         <svg id="avatar" viewBox="0 0 200 240">
             <rect x="70" y="80" width="60" height="80" rx="15" fill="#3498db"/>
             <g id="head" style="transform-origin: 100px 75px;">
@@ -181,35 +198,38 @@
 
 <script>
     const rounds = [
+        // RONDA 1: En el paso 8 aparece el muñeco haciendo la pose correcta (spin)
         [
-            { text: "👃 Tocar nariz", speak: "Tocar nariz", pose: "nose" },
-            { text: "👂 Tocar oreja izquierda", speak: "Tocar oreja izquierda", pose: "earLeft" },
-            { text: "💪 Tocar hombro derecho", speak: "Tocar hombro derecho", pose: "shoulderRight" },
-            { text: "⬆️ Saltar", speak: "Saltar", pose: "jump" },
-            { text: "🙆 Tocar cabeza", speak: "Tocar cabeza", pose: "head" },
-            { text: "👏 Aplaudir", speak: "Aplaudir", pose: "clap" },
-            { text: "🦵 Tocar rodilla", speak: "Tocar rodilla", pose: "knee" },
-            { text: "🔄 Girar", speak: "Girar", pose: "spin" }
+            { icon: "👃", text: "Tocar nariz", pose: "nose" },
+            { icon: "👂", text: "Tocar oreja izquierda", pose: "earLeft" },
+            { icon: "💪", text: "Tocar hombro derecho", pose: "shoulderRight" },
+            { icon: "⬆️", text: "Saltar", pose: "jump" },
+            { icon: "🙆", text: "Tocar cabeza", pose: "head" },
+            { icon: "👏", text: "Aplaudir", pose: "clap" },
+            { icon: "🦵", text: "Tocar rodilla", pose: "knee" },
+            { icon: "🔄", text: "Girar", pose: "spin" }
         ],
+        // RONDA 2: En el paso 8 aparece el muñeco haciendo la pose correcta (jump)
         [
-            { text: "👄 Tocar boca", speak: "Tocar boca", pose: "mouth" },
-            { text: "🦒 Mover cuello", speak: "Mover cuello", pose: "neck" },
-            { text: "🙌 Levantar brazos", speak: "Levantar brazos", pose: "armsUp" },
-            { text: "⬇️ Agacharse", speak: "Agacharse", pose: "squat" },
-            { text: "👂 Tocar oreja derecha", speak: "Tocar oreja derecha", pose: "earRight" },
-            { text: "👃 Tocar nariz", speak: "Tocar nariz", pose: "nose" },
-            { text: "👏 Aplaudir", speak: "Aplaudir", pose: "clap" },
-            { text: "⬆️ Saltar", speak: "Saltar", pose: "jump" }
+            { icon: "👄", text: "Tocar boca", pose: "mouth" },
+            { icon: "🦒", text: "Mover cuello", pose: "neck" },
+            { icon: "🙌", text: "Levantar brazos", pose: "armsUp" },
+            { icon: "⬇️", text: "Agacharse", pose: "squat" },
+            { icon: "👂", text: "Tocar oreja derecha", pose: "earRight" },
+            { icon: "👃", text: "Tocar nariz", pose: "nose" },
+            { icon: "👏", text: "Aplaudir", pose: "clap" },
+            { icon: "⬆️", text: "Saltar", pose: "jump" }
         ],
+        // RONDA 3: En el paso 8 aparece el muñeco haciendo TRAMPA (dice "Tocar nariz", pero se toca la cabeza)
         [
-            { text: "👃 Tocar nariz", speak: "Tocar nariz", pose: "earLeft" },
-            { text: "🙌 Levantar brazos", speak: "Levantar brazos", pose: "squat" },
-            { text: "👂 Tocar oreja derecha", speak: "Tocar oreja derecha", pose: "nose" },
-            { text: "⬆️ Saltar", speak: "Saltar", pose: "clap" },
-            { text: "🙆 Tocar cabeza", speak: "Tocar cabeza", pose: "knee" },
-            { text: "👄 Tocar boca", speak: "Tocar boca", pose: "armsUp" },
-            { text: "⬇️ Agacharse", speak: "Agacharse", pose: "jump" },
-            { text: "👏 Aplaudir", speak: "Aplaudir", pose: "head" }
+            { icon: "👂", text: "Tocar oreja izquierda", pose: "earLeft" },
+            { icon: "🙌", text: "Levantar brazos", pose: "armsUp" },
+            { icon: "🦵", text: "Tocar rodilla", pose: "knee" },
+            { icon: "⬆️", text: "Saltar", pose: "jump" },
+            { icon: "👄", text: "Tocar boca", pose: "mouth" },
+            { icon: "⬇️", text: "Agacharse", pose: "squat" },
+            { icon: "👏", text: "Aplaudir", pose: "clap" },
+            { icon: "👃", text: "Tocar nariz", pose: "head" } // ¡TRAMPA EN EL PASO 8!
         ]
     ];
 
@@ -244,33 +264,25 @@
         let step = 0;
 
         musicInterval = setInterval(() => {
+        musicInterval = setInterval(() => {
             if (!audioCtx) return;
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-            
             osc.type = 'triangle';
             osc.frequency.setValueAtTime(bassNotes[step % bassNotes.length], audioCtx.currentTime);
-            
-            gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.11, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.28);
-            
             osc.connect(gain);
             gain.connect(audioCtx.destination);
-            
             osc.start();
             osc.stop(audioCtx.currentTime + 0.28);
             step++;
         }, 320);
     }
+
     function stopMusic() {
-        if (musicInterval) {
-            clearInterval(musicInterval);
-            musicInterval = null;
-        }
-        if (audioCtx) {
-            audioCtx.close();
-            audioCtx = null;
-        }
+        if (musicInterval) { clearInterval(musicInterval); musicInterval = null; }
+        if (audioCtx) { audioCtx.close(); audioCtx = null; }
     }
 
     function speak(text) {
@@ -278,69 +290,42 @@
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'es-ES';
-            utterance.rate = 1.0;
+            utterance.rate = 1.05;
             utterance.onend = resolve;
             window.speechSynthesis.speak(utterance);
         });
     }
 
-    function resetPose() {
-        document.getElementById('avatar').className = '';
-        document.getElementById('arm-left').style.transform = 'rotate(0deg)';
-        document.getElementById('arm-right').style.transform = 'rotate(0deg)';
-        document.getElementById('head').style.transform = 'rotate(0deg)';
+    function showIconMode(emoji) {
+        document.getElementById('avatar').style.display = 'none';
+        const iconEl = document.getElementById('body-part-icon');
+        iconEl.style.display = 'block';
+        iconEl.innerText = emoji;
+        iconEl.style.animation = 'none';
+        iconEl.offsetHeight; 
+        iconEl.style.animation = 'popIn 0.35s ease';
     }
 
-    function applyPose(pose) {
-        resetPose();
+    function showAvatarMode(pose) {
+        document.getElementById('body-part-icon').style.display = 'none';
         const avatar = document.getElementById('avatar');
+        avatar.style.display = 'block';
+        
+        avatar.className = '';
         const armL = document.getElementById('arm-left');
         const armR = document.getElementById('arm-right');
         const head = document.getElementById('head');
+        armL.style.transform = 'rotate(0deg)';
+        armR.style.transform = 'rotate(0deg)';
+        head.style.transform = 'rotate(0deg)';
 
-        switch(pose) {
-            case 'nose':
-            case 'mouth':
-                armR.style.transform = 'rotate(135deg)';
-                break;
-            case 'earLeft':
-                armL.style.transform = 'rotate(-145deg)';
-                break;
-            case 'earRight':
-                armR.style.transform = 'rotate(145deg)';
-                break;
-            case 'head':
-                armL.style.transform = 'rotate(-160deg)';
-                armR.style.transform = 'rotate(160deg)';
-                break;
-            case 'shoulderRight':
-                armL.style.transform = 'rotate(-90deg)';
-                break;
-            case 'armsUp':
-                armL.style.transform = 'rotate(-170deg)';
-                armR.style.transform = 'rotate(170deg)';
-                break;
-            case 'clap':
-                armL.style.transform = 'rotate(-70deg)';
-                armR.style.transform = 'rotate(70deg)';
-                break;
-            case 'knee':
-                armL.style.transform = 'rotate(-30deg)';
-                armR.style.transform = 'rotate(30deg)';
-                avatar.classList.add('pose-agacharse');
-                break;
-            case 'squat':
-                avatar.classList.add('pose-agacharse');
-                break;
-            case 'jump':
-                avatar.classList.add('pose-saltar');
-                break;
-            case 'spin':
-                avatar.classList.add('pose-girar');
-                break;
-            case 'neck':
-                head.style.transform = 'rotate(20deg)';
-                break;
+        if (pose === 'head') {
+            armL.style.transform = 'rotate(-160deg)';
+            armR.style.transform = 'rotate(160deg)';
+        } else if (pose === 'jump') {
+            avatar.classList.add('pose-saltar');
+        } else if (pose === 'spin') {
+            avatar.classList.add('pose-girar');
         }
     }
 
@@ -354,43 +339,53 @@
 
         startMusic();
 
-        if (currentRound === 2) {
-            box.innerHTML = '<span>⚠️ ¡RONDA DE TRAMPA! ⚠️</span><span class="sub-hint">No mires al muñeco, solo ESCUCHA y lee</span>';
-            await speak("Atención. Ronda final. No mires lo que hace el muñeco, solo escucha lo que dice.");
-            await sleep(1200);
-        }
-
         for (let i = 0; i < sequence.length; i++) {
             const action = sequence[i];
-            counter.innerText = 'Paso: ' + (i + 1) + ' / 8';
-            box.innerHTML = '<span>' + action.text + '</span><span class="sub-hint">¡Hazlo y memorízalo!</span>';
-            
-            applyPose(action.pose);
-            await speak(action.speak);
-            
-            await sleep(1600);
-            resetPose();
-            await sleep(400);
+            const stepNum = i + 1;
+            counter.innerText = 'Parte: ' + stepNum + ' / 8';
+
+            if (stepNum < 8) {
+                showIconMode(action.icon);
+                box.innerHTML = '<span>' + action.text + '</span>';
+                await speak(action.text);
+
+                if (stepNum === 1) {
+                    box.innerHTML = '<span>' + action.text + '</span><span class="sub-hint">¡Haz el movimiento!</span>';
+                    await sleep(1800);
+                } else if (stepNum === 2) {
+                    showIconMode("🧠");
+                    box.innerHTML = '<span>Repite la 1ª y la 2ª</span><span class="sub-hint">De memoria...</span>';
+                    await speak("Repite la primera y la segunda.");
+                    await sleep(2400);
+                } else {
+                    showIconMode("🧠");
+                    box.innerHTML = '<span>Repite las ' + stepNum + ' partes hasta el momento</span><span class="sub-hint">¡En orden y de memoria!</span>';
+                    await speak("Repite las " + stepNum + " partes hasta el momento.");
+                    await sleep(1800 + (stepNum * 500));
+                }
+            } else {
+                showAvatarMode(action.pose);
+                box.innerHTML = '<span>🤖 ¡Última parte! ' + action.text + '</span><span class="sub-hint">¡Atención al muñeco!</span>';
+                await speak("Última parte: " + action.text);
+                await sleep(1000);
+
+                box.innerHTML = '<span>🔥 ¡Repite las 8 partes completas!</span><span class="sub-hint">Sigue moviéndote mientras suena la música...</span>';
+                await speak("Ahora repite las ocho partes completas de memoria.");
+                
+                const extraTime = Math.floor(Math.random() * 3000) + 6500;
+                await sleep(extraTime);
+            }
         }
 
-        counter.innerText = "¡8 / 8 Completados!";
-        box.innerHTML = '<span>🧠 ¡Repite los 8 pasos de memoria!</span><span class="sub-hint">Sigue moviéndote al ritmo de la música...</span>';
-        applyPose('jump');
-        await speak("Ahora repite los ocho pasos de memoria mientras sigue la música.");
-        
-        const extraMusicTime = Math.floor(Math.random() * 4000) + 6000;
-        await sleep(extraMusicTime);
-
         stopMusic();
-        resetPose();
+        showIconMode("🛑");
 
         const challenge = searchChallenges[currentRound];
-        box.innerHTML = '<span style="color: var(--danger);">🛑 ¡SE PARÓ LA MÚSICA!</span><span style="color: var(--warning); font-size: 1.5rem; margin-top:8px;">' + challenge + '</span>';
+        box.innerHTML = '<span style="color: var(--danger);">¡SE PARÓ LA MÚSICA!</span><span style="color: var(--warning); font-size: 1.5rem; margin-top:8px;">' + challenge + '</span>';
         await speak("¡Alto! " + challenge);
 
         const qaModal = document.getElementById('qa-modal');
         const qData = envQuestions[currentRound];
-        
         document.getElementById('env-question').innerText = qData.q;
         document.getElementById('env-answer').innerText = "✅ Respuesta: " + qData.a;
         document.getElementById('env-answer').style.display = 'none';
@@ -406,17 +401,19 @@
         currentRound++;
 
         if (currentRound < 3) {
+            showIconMode("🧠");
             document.getElementById('round-badge').innerText = 'Ronda ' + (currentRound + 1) + ' de 3';
-            document.getElementById('step-counter').innerText = 'Paso: 0 / 8';
+            document.getElementById('step-counter').innerText = 'Parte: 0 / 8';
             document.getElementById('instruction-box').innerHTML = '<span>Listos para la Ronda ' + (currentRound + 1) + '</span><span class="sub-hint">Presiona el botón cuando estén preparados</span>';
             
             const btnStart = document.getElementById('btn-start');
             btnStart.innerText = '▶️ Iniciar Ronda ' + (currentRound + 1);
             btnStart.style.display = 'inline-block';
         } else {
+            showIconMode("🌍");
             document.getElementById('round-badge').innerText = "¡Juego Terminado!";
             document.getElementById('step-counter').innerText = "Completado";
-            document.getElementById('instruction-box').innerHTML = '<span>🎉 ¡Felicitaciones a todos! 🌍</span><span class="sub-hint">Gracias por jugar y cuidar el medio ambiente</span>';
+            document.getElementById('instruction-box').innerHTML = '<span>🎉 ¡Felicitaciones a todos!</span><span class="sub-hint">Gracias por jugar y cuidar el medio ambiente</span>';
             speak("Felicitaciones a todos. Gracias por jugar y cuidar el medio ambiente.");
         }
     }
