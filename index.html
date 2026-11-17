@@ -1,235 +1,51 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reto Corporal y Ambiental</title>
-    <style>
-        :root {
-            --primary: #2ecc71;
-            --secondary: #3498db;
-            --warning: #f1c40f;
-            --danger: #e74c3c;
-            --dark: #1e272e;
-            --card: #2f3640;
-            --light: #f5f6fa;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--dark);
-            color: var(--light);
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            text-align: center;
-            padding: 15px;
-        }
-        #game-container {
-            background: var(--card);
-            border-radius: 20px;
-            padding: 25px;
-            max-width: 600px;
-            width: 100%;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-        }
-        .header-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .badge {
-            background: var(--secondary);
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 0.95rem;
-        }
-        .step-counter {
-            background: rgba(255,255,255,0.1);
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-weight: bold;
-            color: var(--warning);
-        }
-        h1 { margin: 5px 0 15px 0; color: var(--primary); font-size: 1.8rem; }
-        
-        /* Escenario central (Ícono grande vs Muñeco) */
-        #visual-stage {
-            height: 230px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 10px 0;
-        }
-        #body-part-icon {
-            font-size: 8.5rem;
-            line-height: 1;
-            animation: popIn 0.35s ease;
-            user-select: none;
-        }
-        @keyframes popIn {
-            0% { transform: scale(0.4); opacity: 0; }
-            80% { transform: scale(1.1); opacity: 1; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        svg { width: 200px; height: 230px; overflow: visible; display: none; }
-        #arm-left, #arm-right, #head { transition: transform 0.25s ease; }
-        .pose-saltar { animation: jump 0.45s infinite alternate; }
-        .pose-girar { animation: spin 0.7s ease; }
-        .pose-agacharse { transform: translateY(30px) scaleY(0.85); }
-        
-        @keyframes jump { from { transform: translateY(0); } to { transform: translateY(-25px); } }
-        @keyframes spin { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
-
-        #instruction-box {
-            font-size: 1.75rem;
-            font-weight: bold;
-            min-height: 95px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0,0,0,0.3);
-            border-radius: 15px;
-            padding: 15px;
-            margin: 15px 0;
-            border: 2px solid rgba(255,255,255,0.05);
-        }
-        .sub-hint {
-            font-size: 1.05rem;
-            color: var(--warning);
-            font-weight: normal;
-            margin-top: 8px;
-        }
-
-        button {
-            background: var(--primary);
-            color: var(--dark);
-            border: none;
-            padding: 15px 30px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border-radius: 12px;
-            cursor: pointer;
-            margin: 8px;
-            transition: transform 0.15s;
-        }
-        button:hover { transform: scale(1.04); }
-        .btn-blue { background: var(--secondary); color: white; }
-        
-        #qa-modal {
-            background: #192a56;
-            padding: 20px;
-            border-radius: 15px;
-            border: 2px solid var(--warning);
-            margin-top: 15px;
-            display: none;
-        }
-        .answer-text {
-            color: var(--primary);
-            font-weight: bold;
-            font-size: 1.2rem;
-            margin-top: 10px;
-            display: none;
-        }
-    </style>
-</head>
-<body>
-
-<div id="game-container">
-    <div class="header-bar">
-        <span class="badge" id="round-badge">Ronda 1 de 3</span>
-        <span class="step-counter" id="step-counter">Parte: 0 / 8</span>
-    </div>
-    <h1>Escucha, Memoriza y Actúa</h1>
-    
-    <div id="visual-stage">
-        <!-- Imagen/Ícono grande para las primeras 7 partes -->
-        <div id="body-part-icon">🧠</div>
-
-        <!-- Muñeco SVG (aparece solo en la parte 8) -->
-        <svg id="avatar" viewBox="0 0 200 240">
-            <rect x="70" y="80" width="60" height="80" rx="15" fill="#3498db"/>
-            <g id="head" style="transform-origin: 100px 75px;">
-                <circle cx="100" cy="45" r="30" fill="#f1c40f"/>
-                <circle cx="68" cy="45" r="7" fill="#e67e22"/>
-                <circle cx="132" cy="45" r="7" fill="#e67e22"/>
-                <circle cx="90" cy="40" r="4" fill="#2c3e50"/>
-                <circle cx="110" cy="40" r="4" fill="#2c3e50"/>
-                <circle cx="100" cy="48" r="4" fill="#e74c3c"/>
-                <path d="M 90 58 Q 100 65 110 58" stroke="#2c3e50" stroke-width="3" fill="none"/>
-            </g>
-            <g id="arm-left" style="transform-origin: 65px 90px;">
-                <rect x="45" y="85" width="20" height="60" rx="10" fill="#f1c40f"/>
-            </g>
-            <g id="arm-right" style="transform-origin: 135px 90px;">
-                <rect x="135" y="85" width="20" height="60" rx="10" fill="#f1c40f"/>
-            </g>
-            <g id="legs">
-                <rect x="75" y="160" width="20" height="60" rx="10" fill="#2980b9"/>
-                <rect x="105" y="160" width="20" height="60" rx="10" fill="#2980b9"/>
-            </g>
-        </svg>
-    </div>
-
-    <div id="instruction-box">
-        <span>Presiona iniciar para comenzar</span>
-        <span class="sub-hint">La música sonará durante toda la ronda</span>
-    </div>
-
-    <div id="controls">
-        <button id="btn-start" onclick="startRound()">▶️ Iniciar Ronda 1</button>
-    </div>
-
-    <div id="qa-modal">
-        <h3 style="color: var(--warning); margin-top:0;">🌍 Pregunta para el último en traer el objeto:</h3>
-        <p id="env-question" style="font-size: 1.25rem;"></p>
-        <button class="btn-blue" onclick="document.getElementById('env-answer').style.display='block'">👁️ Mostrar Respuesta</button>
-        <p id="env-answer" class="answer-text"></p>
-        <br>
-        <button id="btn-next-round" onclick="nextRound()">Siguiente Ronda ➡️</button>
-    </div>
-</div>
-
 <script>
+    // Ilustraciones SVG personalizadas para cada parte del cuerpo/acción
+    const bodyGraphics = {
+        nose: '<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="48" fill="#f1c40f"/><circle cx="42" cy="48" r="5" fill="#2c3e50"/><circle cx="78" cy="48" r="5" fill="#2c3e50"/><path d="M 60 45 L 52 68 L 66 68 Z" fill="#e74c3c"/><circle cx="60" cy="64" r="14" fill="none" stroke="#e74c3c" stroke-width="3" stroke-dasharray="4"/><path d="M 42 82 Q 60 92 78 82" stroke="#2c3e50" stroke-width="4" fill="none"/></svg>',
+        earLeft: '<svg viewBox="0 0 120 120"><circle cx="65" cy="60" r="45" fill="#f1c40f"/><ellipse cx="18" cy="60" rx="12" ry="22" fill="#e67e22" stroke="#e74c3c" stroke-width="4"/><circle cx="50" cy="50" r="5" fill="#2c3e50"/><circle cx="80" cy="50" r="5" fill="#2c3e50"/><path d="M 50 80 Q 65 90 80 80" stroke="#2c3e50" stroke-width="4" fill="none"/></svg>',
+        earRight: '<svg viewBox="0 0 120 120"><circle cx="55" cy="60" r="45" fill="#f1c40f"/><ellipse cx="102" cy="60" rx="12" ry="22" fill="#e67e22" stroke="#e74c3c" stroke-width="4"/><circle cx="40" cy="50" r="5" fill="#2c3e50"/><circle cx="70" cy="50" r="5" fill="#2c3e50"/><path d="M 40 80 Q 55 90 70 80" stroke="#2c3e50" stroke-width="4" fill="none"/></svg>',
+        head: '<svg viewBox="0 0 120 120"><circle cx="60" cy="65" r="42" fill="#f1c40f"/><path d="M 22 45 Q 60 5 98 45" stroke="#e74c3c" stroke-width="8" fill="none" stroke-linecap="round"/><circle cx="45" cy="60" r="5" fill="#2c3e50"/><circle cx="75" cy="60" r="5" fill="#2c3e50"/><path d="M 45 82 Q 60 92 75 82" stroke="#2c3e50" stroke-width="4" fill="none"/></svg>',
+        mouth: '<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="48" fill="#f1c40f"/><circle cx="42" cy="45" r="5" fill="#2c3e50"/><circle cx="78" cy="45" r="5" fill="#2c3e50"/><ellipse cx="60" cy="76" rx="18" ry="12" fill="#e74c3c" stroke="#fff" stroke-width="3"/></svg>',
+        shoulderRight: '<svg viewBox="0 0 120 120"><rect x="30" y="45" width="60" height="65" rx="15" fill="#3498db"/><circle cx="60" cy="25" r="18" fill="#f1c40f"/><circle cx="92" cy="52" r="15" fill="#e74c3c"/><text x="92" y="57" font-size="16" fill="white" text-anchor="middle" font-weight="bold">!</text></svg>',
+        knee: '<svg viewBox="0 0 120 120"><rect x="42" y="15" width="36" height="90" rx="15" fill="#2980b9"/><circle cx="60" cy="60" r="16" fill="#e74c3c"/><text x="60" y="65" font-size="14" fill="white" text-anchor="middle" font-weight="bold">RODILLA</text></svg>',
+        neck: '<svg viewBox="0 0 120 120"><circle cx="60" cy="35" r="26" fill="#f1c40f"/><rect x="48" y="60" width="24" height="28" fill="#e67e22" stroke="#e74c3c" stroke-width="4"/><rect x="25" y="86" width="70" height="25" rx="10" fill="#3498db"/></svg>',
+        armsUp: '<svg viewBox="0 0 120 120"><text x="60" y="75" font-size="70" text-anchor="middle">🙌</text></svg>',
+        clap: '<svg viewBox="0 0 120 120"><text x="60" y="75" font-size="70" text-anchor="middle">👏</text></svg>',
+        jump: '<svg viewBox="0 0 120 120"><text x="60" y="75" font-size="70" text-anchor="middle">⬆️🏃</text></svg>',
+        squat: '<svg viewBox="0 0 120 120"><text x="60" y="75" font-size="70" text-anchor="middle">⬇️🧎</text></svg>',
+        spin: '<svg viewBox="0 0 120 120"><text x="60" y="75" font-size="70" text-anchor="middle">🔄💃</text></svg>'
+    };
+
     const rounds = [
-        // RONDA 1: En el paso 8 aparece el muñeco haciendo la pose correcta (spin)
         [
-            { icon: "👃", text: "Tocar nariz", pose: "nose" },
-            { icon: "👂", text: "Tocar oreja izquierda", pose: "earLeft" },
-            { icon: "💪", text: "Tocar hombro derecho", pose: "shoulderRight" },
-            { icon: "⬆️", text: "Saltar", pose: "jump" },
-            { icon: "🙆", text: "Tocar cabeza", pose: "head" },
-            { icon: "👏", text: "Aplaudir", pose: "clap" },
-            { icon: "🦵", text: "Tocar rodilla", pose: "knee" },
-            { icon: "🔄", text: "Girar", pose: "spin" }
+            { text: "Tocar nariz", part: "nose", pose: "nose" },
+            { text: "Tocar oreja izquierda", part: "earLeft", pose: "earLeft" },
+            { text: "Tocar hombro derecho", part: "shoulderRight", pose: "shoulderRight" },
+            { text: "Saltar", part: "jump", pose: "jump" },
+            { text: "Tocar cabeza", part: "head", pose: "head" },
+            { text: "Aplaudir", part: "clap", pose: "clap" },
+            { text: "Tocar rodilla", part: "knee", pose: "knee" },
+            { text: "Girar", part: "spin", pose: "spin" }
         ],
-        // RONDA 2: En el paso 8 aparece el muñeco haciendo la pose correcta (jump)
         [
-            { icon: "👄", text: "Tocar boca", pose: "mouth" },
-            { icon: "🦒", text: "Mover cuello", pose: "neck" },
-            { icon: "🙌", text: "Levantar brazos", pose: "armsUp" },
-            { icon: "⬇️", text: "Agacharse", pose: "squat" },
-            { icon: "👂", text: "Tocar oreja derecha", pose: "earRight" },
-            { icon: "👃", text: "Tocar nariz", pose: "nose" },
-            { icon: "👏", text: "Aplaudir", pose: "clap" },
-            { icon: "⬆️", text: "Saltar", pose: "jump" }
+            { text: "Tocar boca", part: "mouth", pose: "mouth" },
+            { text: "Mover cuello", part: "neck", pose: "neck" },
+            { text: "Levantar brazos", part: "armsUp", pose: "armsUp" },
+            { text: "Agacharse", part: "squat", pose: "squat" },
+            { text: "Tocar oreja derecha", part: "earRight", pose: "earRight" },
+            { text: "Tocar nariz", part: "nose", pose: "nose" },
+            { text: "Aplaudir", part: "clap", pose: "clap" },
+            { text: "Saltar", part: "jump", pose: "jump" }
         ],
-        // RONDA 3: En el paso 8 aparece el muñeco haciendo TRAMPA (dice "Tocar nariz", pero se toca la cabeza)
         [
-            { icon: "👂", text: "Tocar oreja izquierda", pose: "earLeft" },
-            { icon: "🙌", text: "Levantar brazos", pose: "armsUp" },
-            { icon: "🦵", text: "Tocar rodilla", pose: "knee" },
-            { icon: "⬆️", text: "Saltar", pose: "jump" },
-            { icon: "👄", text: "Tocar boca", pose: "mouth" },
-            { icon: "⬇️", text: "Agacharse", pose: "squat" },
-            { icon: "👏", text: "Aplaudir", pose: "clap" },
-            { icon: "👃", text: "Tocar nariz", pose: "head" } // ¡TRAMPA EN EL PASO 8!
+            { text: "Tocar oreja izquierda", part: "earLeft", pose: "earLeft" },
+            { text: "Levantar brazos", part: "armsUp", pose: "armsUp" },
+            { text: "Tocar rodilla", part: "knee", pose: "knee" },
+            { text: "Saltar", part: "jump", pose: "jump" },
+            { text: "Tocar boca", part: "mouth", pose: "mouth" },
+            { text: "Agacharse", part: "squat", pose: "squat" },
+            { text: "Aplaudir", part: "clap", pose: "clap" },
+            { text: "Tocar nariz", part: "nose", pose: "head" } // Trampa del muñeco al final de la Ronda 3
         ]
     ];
 
@@ -240,30 +56,21 @@
     ];
 
     const envQuestions = [
-        {
-            q: "¿De qué color es la caneca donde van los residuos aprovechables como plástico, cartón y vidrio limpios?",
-            a: "Color BLANCO."
-        },
-        {
-            q: "¿Qué significa la regla de las 3R en el cuidado del medio ambiente?",
-            a: "Reducir, Reutilizar y Reciclar."
-        },
-        {
-            q: "¿En qué caneca se deben depositar las cáscaras de frutas y restos de comida?",
-            a: "En la caneca de color VERDE (residuos orgánicos)."
-        }
+        { q: "¿De qué color es la caneca donde van los residuos aprovechables como plástico, cartón y vidrio limpios?", a: "Color BLANCO." },
+        { q: "¿Qué significa la regla de las 3R en el cuidado del medio ambiente?", a: "Reducir, Reutilizar y Reciclar." },
+        { q: "¿En qué caneca se deben depositar las cáscaras de frutas y restos de comida?", a: "En la caneca de color VERDE (residuos orgánicos)." }
     ];
 
     let currentRound = 0;
+    let currentStepIndex = -1;
     let musicInterval = null;
     let audioCtx = null;
 
     function startMusic() {
+        if (audioCtx) return;
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const bassNotes = [130.81, 164.81, 196.00, 164.81, 146.83, 174.61, 220.00, 196.00];
         let step = 0;
-
-        musicInterval = setInterval(() => {
         musicInterval = setInterval(() => {
             if (!audioCtx) return;
             const osc = audioCtx.createOscillator();
@@ -296,18 +103,15 @@
         });
     }
 
-    function showIconMode(emoji) {
+    function showBodyPartImage(partKey) {
         document.getElementById('avatar').style.display = 'none';
-        const iconEl = document.getElementById('body-part-icon');
-        iconEl.style.display = 'block';
-        iconEl.innerText = emoji;
-        iconEl.style.animation = 'none';
-        iconEl.offsetHeight; 
-        iconEl.style.animation = 'popIn 0.35s ease';
+        const container = document.getElementById('part-illustration');
+        container.style.display = 'block';
+        container.innerHTML = bodyGraphics[partKey] || bodyGraphics.nose;
     }
 
-    function showAvatarMode(pose) {
-        document.getElementById('body-part-icon').style.display = 'none';
+    function showAvatarPose(pose) {
+        document.getElementById('part-illustration').style.display = 'none';
         const avatar = document.getElementById('avatar');
         avatar.style.display = 'block';
         
@@ -319,81 +123,137 @@
         armR.style.transform = 'rotate(0deg)';
         head.style.transform = 'rotate(0deg)';
 
-        if (pose === 'head') {
-            armL.style.transform = 'rotate(-160deg)';
-            armR.style.transform = 'rotate(160deg)';
-        } else if (pose === 'jump') {
-            avatar.classList.add('pose-saltar');
-        } else if (pose === 'spin') {
-            avatar.classList.add('pose-girar');
+        switch(pose) {
+            case 'nose': case 'mouth': armR.style.transform = 'rotate(135deg)'; break;
+            case 'earLeft': armL.style.transform = 'rotate(-145deg)'; break;
+            case 'earRight': armR.style.transform = 'rotate(145deg)'; break;
+            case 'head': armL.style.transform = 'rotate(-160deg)'; armR.style.transform = 'rotate(160deg)'; break;
+            case 'shoulderRight': armL.style.transform = 'rotate(-90deg)'; break;
+            case 'armsUp': armL.style.transform = 'rotate(-170deg)'; armR.style.transform = 'rotate(170deg)'; break;
+            case 'clap': armL.style.transform = 'rotate(-70deg)'; armR.style.transform = 'rotate(70deg)'; break;
+            case 'knee': armL.style.transform = 'rotate(-30deg)'; armR.style.transform = 'rotate(30deg)'; avatar.classList.add('pose-agacharse'); break;
+            case 'squat': avatar.classList.add('pose-agacharse'); break;
+            case 'jump': avatar.classList.add('pose-saltar'); break;
+            case 'spin': avatar.classList.add('pose-girar'); break;
+            case 'neck': head.style.transform = 'rotate(20deg)'; break;
         }
     }
 
     const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-    async function startRound() {
+    function setButtonsEnabled(enabled) {
+        document.getElementById('btn-next-step').disabled = !enabled;
+        document.getElementById('btn-help').disabled = !enabled;
+    }
+
+    function startRound() {
         document.getElementById('btn-start').style.display = 'none';
+        document.getElementById('btn-next-step').style.display = 'inline-block';
+        document.getElementById('btn-help').style.display = 'inline-block';
+        currentStepIndex = -1;
+        startMusic();
+        nextStep();
+    }
+    async function nextStep() {
+        currentStepIndex++;
         const sequence = rounds[currentRound];
         const box = document.getElementById('instruction-box');
         const counter = document.getElementById('step-counter');
 
-        startMusic();
-
-        for (let i = 0; i < sequence.length; i++) {
-            const action = sequence[i];
-            const stepNum = i + 1;
+        if (currentStepIndex < sequence.length) {
+            setButtonsEnabled(false);
+            const action = sequence[currentStepIndex];
+            const stepNum = currentStepIndex + 1;
             counter.innerText = 'Parte: ' + stepNum + ' / 8';
 
-            if (stepNum < 8) {
-                showIconMode(action.icon);
-                box.innerHTML = '<span>' + action.text + '</span>';
-                await speak(action.text);
+            showBodyPartImage(action.part);
+            box.innerHTML = '<span>' + action.text + '</span><span class="sub-hint">¡Ahora hazlo tú!</span>';
+            await speak(action.text + ". Ahora hazlo tú.");
 
-                if (stepNum === 1) {
-                    box.innerHTML = '<span>' + action.text + '</span><span class="sub-hint">¡Haz el movimiento!</span>';
-                    await sleep(1800);
-                } else if (stepNum === 2) {
-                    showIconMode("🧠");
-                    box.innerHTML = '<span>Repite la 1ª y la 2ª</span><span class="sub-hint">De memoria...</span>';
-                    await speak("Repite la primera y la segunda.");
-                    await sleep(2400);
-                } else {
-                    showIconMode("🧠");
-                    box.innerHTML = '<span>Repite las ' + stepNum + ' partes hasta el momento</span><span class="sub-hint">¡En orden y de memoria!</span>';
-                    await speak("Repite las " + stepNum + " partes hasta el momento.");
-                    await sleep(1800 + (stepNum * 500));
-                }
-            } else {
-                showAvatarMode(action.pose);
-                box.innerHTML = '<span>🤖 ¡Última parte! ' + action.text + '</span><span class="sub-hint">¡Atención al muñeco!</span>';
-                await speak("Última parte: " + action.text);
-                await sleep(1000);
-
-                box.innerHTML = '<span>🔥 ¡Repite las 8 partes completas!</span><span class="sub-hint">Sigue moviéndote mientras suena la música...</span>';
-                await speak("Ahora repite las ocho partes completas de memoria.");
-                
-                const extraTime = Math.floor(Math.random() * 3000) + 6500;
-                await sleep(extraTime);
+            if (stepNum > 1) {
+                box.innerHTML = '<span>' + action.text + '</span><span class="sub-hint">Repite las ' + stepNum + ' partes acumuladas de memoria</span>';
             }
+
+            if (stepNum === 8) {
+                document.getElementById('btn-next-step').innerText = "🤖 Repaso Final con el Muñeco";
+            } else {
+                document.getElementById('btn-next-step').innerText = "➡️ Siguiente Parte";
+            }
+            setButtonsEnabled(true);
+        } else {
+            document.getElementById('btn-next-step').style.display = 'none';
+            document.getElementById('btn-help').style.display = 'none';
+            counter.innerText = "¡Ronda Completa!";
+
+            if (currentRound === 2) {
+                box.innerHTML = '<span>⚠️ ¡ATENCIÓN AL MUÑECO! ⚠️</span><span class="sub-hint">No te dejes engañar por lo que hace, ¡ESCUCHA!</span>';
+                showAvatarPose('jump');
+                await speak("Atención al muñeco. No te dejes engañar por lo que hace, escucha lo que dice.");
+                await sleep(1000);
+            } else {
+                box.innerHTML = '<span>🤖 ¡Repaso final con el muñeco!</span><span class="sub-hint">Sigue el ritmo...</span>';
+                showAvatarPose('jump');
+                await speak("Excelente. Ahora hazlo junto al muñeco.");
+                await sleep(800);
+            }
+
+            for (let i = 0; i < sequence.length; i++) {
+                const item = sequence[i];
+                box.innerHTML = '<span>' + (i + 1) + '. ' + item.text + '</span>';
+                showAvatarPose(item.pose);
+                await speak(item.text);
+                await sleep(400);
+            }
+
+            showAvatarPose('jump');
+            box.innerHTML = '<span>🎶 ¡Baila mientras suena la música! 🎶</span>';
+            const extraTime = Math.floor(Math.random() * 3000) + 3500;
+            await sleep(extraTime);
+
+            stopMusic();
+            document.getElementById('avatar').style.display = 'none';
+            document.getElementById('part-illustration').style.display = 'block';
+            document.getElementById('part-illustration').innerHTML = '<svg viewBox="0 0 100 100"><text x="50" y="65" font-size="55" text-anchor="middle">🛑</text></svg>';
+
+            const challenge = searchChallenges[currentRound];
+            box.innerHTML = '<span style="color: var(--danger);">¡SE PARÓ LA MÚSICA!</span><span style="color: var(--warning); font-size: 1.5rem; margin-top:8px;">' + challenge + '</span>';
+            await speak("¡Alto! " + challenge);
+
+            const qaModal = document.getElementById('qa-modal');
+            const qData = envQuestions[currentRound];
+            document.getElementById('env-question').innerText = qData.q;
+            document.getElementById('env-answer').innerText = "✅ Respuesta: " + qData.a;
+            document.getElementById('env-answer').style.display = 'none';
+            
+            if (currentRound === 2) {
+                document.getElementById('btn-next-round').innerText = "Finalizar Juego 🏆";
+            }
+            qaModal.style.display = 'block';
+        }
+    }
+
+    async function showHelp() {
+        setButtonsEnabled(false);
+        const sequence = rounds[currentRound];
+        const box = document.getElementById('instruction-box');
+
+        box.innerHTML = '<span>🤖 ¡Tranquilo, yo te recuerdo el orden!</span><span class="sub-hint">Mira y escucha con atención...</span>';
+        showAvatarPose('jump');
+        await speak("Mira y escucha el orden hasta el momento:");
+        await sleep(500);
+
+        for (let i = 0; i <= currentStepIndex; i++) {
+            const item = sequence[i];
+            box.innerHTML = '<span>' + (i + 1) + '. ' + item.text + '</span><span class="sub-hint">Recordando secuencia...</span>';
+            showAvatarPose(item.part);
+            await speak(item.text);
+            await sleep(350);
         }
 
-        stopMusic();
-        showIconMode("🛑");
-
-        const challenge = searchChallenges[currentRound];
-        box.innerHTML = '<span style="color: var(--danger);">¡SE PARÓ LA MÚSICA!</span><span style="color: var(--warning); font-size: 1.5rem; margin-top:8px;">' + challenge + '</span>';
-        await speak("¡Alto! " + challenge);
-
-        const qaModal = document.getElementById('qa-modal');
-        const qData = envQuestions[currentRound];
-        document.getElementById('env-question').innerText = qData.q;
-        document.getElementById('env-answer').innerText = "✅ Respuesta: " + qData.a;
-        document.getElementById('env-answer').style.display = 'none';
-        
-        if (currentRound === 2) {
-            document.getElementById('btn-next-round').innerText = "Finalizar Juego 🏆";
-        }
-        qaModal.style.display = 'block';
+        const currentAction = sequence[currentStepIndex];
+        showBodyPartImage(currentAction.part);
+        box.innerHTML = '<span>' + currentAction.text + '</span><span class="sub-hint">¡Ahora inténtalo tú!</span>';
+        setButtonsEnabled(true);
     }
 
     function nextRound() {
@@ -401,7 +261,10 @@
         currentRound++;
 
         if (currentRound < 3) {
-            showIconMode("🧠");
+            document.getElementById('avatar').style.display = 'none';
+            document.getElementById('part-illustration').style.display = 'block';
+            document.getElementById('part-illustration').innerHTML = '<svg viewBox="0 0 100 100"><text x="50" y="62" font-size="45" text-anchor="middle">🧠</text></svg>';
+
             document.getElementById('round-badge').innerText = 'Ronda ' + (currentRound + 1) + ' de 3';
             document.getElementById('step-counter').innerText = 'Parte: 0 / 8';
             document.getElementById('instruction-box').innerHTML = '<span>Listos para la Ronda ' + (currentRound + 1) + '</span><span class="sub-hint">Presiona el botón cuando estén preparados</span>';
@@ -410,7 +273,9 @@
             btnStart.innerText = '▶️ Iniciar Ronda ' + (currentRound + 1);
             btnStart.style.display = 'inline-block';
         } else {
-            showIconMode("🌍");
+            document.getElementById('avatar').style.display = 'none';
+            document.getElementById('part-illustration').style.display = 'block';
+            document.getElementById('part-illustration').innerHTML = '<svg viewBox="0 0 100 100"><text x="50" y="65" font-size="55" text-anchor="middle">🌍</text></svg>';
             document.getElementById('round-badge').innerText = "¡Juego Terminado!";
             document.getElementById('step-counter').innerText = "Completado";
             document.getElementById('instruction-box').innerHTML = '<span>🎉 ¡Felicitaciones a todos!</span><span class="sub-hint">Gracias por jugar y cuidar el medio ambiente</span>';
@@ -421,3 +286,4 @@
 
 </body>
 </html>
+
