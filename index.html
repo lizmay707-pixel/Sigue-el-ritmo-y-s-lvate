@@ -12,7 +12,7 @@
   .step { background: rgba(255,255,255,0.1); padding: 5px 14px; border-radius: 15px; color: #f1c40f; }
   h1 { color: #2ecc71; font-size: 1.7rem; margin: 10px 0; }
   .stage { height: 210px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.2); border-radius: 15px; margin: 12px 0; }
-  #part-img svg { width: 165px; height: 165px; }
+  #part-emoji { font-size: 7.5rem; line-height: 1; user-select: none; }
   #avatar { width: 180px; height: 200px; display: none; overflow: visible; }
   #arm-l, #arm-r, #head { transition: transform 0.25s; }
   .jump { animation: jump 0.45s infinite alternate; }
@@ -36,7 +36,7 @@
   <div class="top"><span class="badge" id="r-badge">Ronda 1 de 3</span><span class="step" id="s-count">Parte: 0 / 8</span></div>
   <h1>Escucha, Memoriza y Actúa</h1>
   <div class="stage">
-    <div id="part-img"><svg viewBox="0 0 100 100"><text x="50" y="65" font-size="55" text-anchor="middle">🧠</text></svg></div>
+    <div id="part-emoji">🧠</div>
     <svg id="avatar" viewBox="0 0 200 240">
       <rect x="70" y="80" width="60" height="80" rx="15" fill="#3498db"/>
       <g id="head" style="transform-origin:100px 75px"><circle cx="100" cy="45" r="30" fill="#f1c40f"/><circle cx="68" cy="45" r="7" fill="#e67e22"/><circle cx="132" cy="45" r="7" fill="#e67e22"/><circle cx="90" cy="40" r="4" fill="#2c3e50"/><circle cx="110" cy="40" r="4" fill="#2c3e50"/><circle cx="100" cy="48" r="4" fill="#e74c3c"/><path d="M90 58 Q100 65 110 58" stroke="#2c3e50" stroke-width="3" fill="none"/></g>
@@ -60,31 +60,26 @@
   </div>
 </div>
 <script>
-const imgs = {
-  nose: '<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="48" fill="#f1c40f"/><circle cx="42" cy="48" r="5" fill="#2c3e50"/><circle cx="78" cy="48" r="5" fill="#2c3e50"/><path d="M60 45 L52 68 L66 68 Z" fill="#e74c3c"/><circle cx="60" cy="64" r="14" fill="none" stroke="#e74c3c" stroke-width="3" stroke-dasharray="4"/><path d="M42 82 Q60 92 78 82" stroke="#2c3e50" stroke-width="4" fill="none"/></svg>',
-  earLeft: '<svg viewBox="0 0 120 120"><circle cx="65" cy="60" r="45" fill="#f1c40f"/><ellipse cx="18" cy="60" rx="12" ry="22" fill="#e67e22" stroke="#e74c3c" stroke-width="4"/><circle cx="50" cy="50" r="5" fill="#2c3e50"/><circle cx="80" cy="50" r="5" fill="#2c3e50"/><path d="M50 80 Q65 90 80 80" stroke="#2c3e50" stroke-width="4" fill="none"/></svg>',
-  earRight: '<svg viewBox="0 0 120 120"><circle cx="55" cy="60" r="45" fill="#f1c40f"/><ellipse cx="102" cy="60" rx="12" ry="22" fill="#e67e22" stroke="#e74c3c" stroke-width="4"/><circle cx="40" cy="50" r="5" fill="#2c3e50"/><circle cx="70" cy="50" r="5" fill="#2c3e50"/><path d="M40 80 Q55 90 70 80" stroke="#2c3e50" stroke-width="4" fill="none"/></svg>',
-  head: '<svg viewBox="0 0 120 120"><circle cx="60" cy="65" r="42" fill="#f1c40f"/><path d="M22 45 Q60 5 98 45" stroke="#e74c3c" stroke-width="8" fill="none" stroke-linecap="round"/><circle cx="45" cy="60" r="5" fill="#2c3e50"/><circle cx="75" cy="60" r="5" fill="#2c3e50"/><path d="M45 82 Q60 92 75 82" stroke="#2c3e50" stroke-width="4" fill="none"/></svg>',
-  mouth: '<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="48" fill="#f1c40f"/><circle cx="42" cy="45" r="5" fill="#2c3e50"/><circle cx="78" cy="45" r="5" fill="#2c3e50"/><ellipse cx="60" cy="76" rx="18" ry="12" fill="#e74c3c" stroke="#fff" stroke-width="3"/></svg>',
-  shoulderRight: '<svg viewBox="0 0 120 120"><rect x="30" y="45" width="60" height="65" rx="15" fill="#3498db"/><circle cx="60" cy="25" r="18" fill="#f1c40f"/><circle cx="92" cy="52" r="15" fill="#e74c3c"/></svg>',
-  knee: '<svg viewBox="0 0 120 120"><rect x="42" y="15" width="36" height="90" rx="15" fill="#2980b9"/><circle cx="60" cy="60" r="16" fill="#e74c3c"/></svg>',
-  neck: '<svg viewBox="0 0 120 120"><circle cx="60" cy="35" r="26" fill="#f1c40f"/><rect x="48" y="60" width="24" height="28" fill="#e67e22" stroke="#e74c3c" stroke-width="4"/><rect x="25" y="86" width="70" height="25" rx="10" fill="#3498db"/></svg>',
-  armsUp: '<svg viewBox="0 0 100 100"><text x="50" y="68" font-size="60" text-anchor="middle">🙌</text></svg>',
-  clap: '<svg viewBox="0 0 100 100"><text x="50" y="68" font-size="60" text-anchor="middle">👏</text></svg>',
-  jump: '<svg viewBox="0 0 100 100"><text x="50" y="68" font-size="60" text-anchor="middle">⬆️</text></svg>',
-  squat: '<svg viewBox="0 0 100 100"><text x="50" y="68" font-size="60" text-anchor="middle">⬇️</text></svg>',
-  spin: '<svg viewBox="0 0 100 100"><text x="50" y="68" font-size="60" text-anchor="middle">🔄</text></svg>'
-};
 const rounds = [
-  [{t:"Tocar nariz",p:"nose",m:"nose"},{t:"Tocar oreja izquierda",p:"earLeft",m:"earLeft"},{t:"Tocar hombro derecho",p:"shoulderRight",m:"shoulderRight"},{t:"Saltar",p:"jump",m:"jump"},{t:"Tocar cabeza",p:"head",m:"head"},{t:"Aplaudir",p:"clap",m:"clap"},{t:"Tocar rodilla",p:"knee",m:"knee"},{t:"Girar",p:"spin",m:"spin"}],
-  [{t:"Tocar boca",p:"mouth",m:"mouth"},{t:"Mover cuello",p:"neck",m:"neck"},{t:"Levantar brazos",p:"armsUp",m:"armsUp"},{t:"Agacharse",p:"squat",m:"squat"},{t:"Tocar oreja derecha",p:"earRight",m:"earRight"},{t:"Tocar nariz",p:"nose",m:"nose"},{t:"Aplaudir",p:"clap",m:"clap"},{t:"Saltar",p:"jump",m:"jump"}],
-  [{t:"Tocar oreja izquierda",p:"earLeft",m:"earLeft"},{t:"Levantar brazos",p:"armsUp",m:"armsUp"},{t:"Tocar rodilla",p:"knee",m:"knee"},{t:"Saltar",p:"jump",m:"jump"},{t:"Tocar boca",p:"mouth",m:"mouth"},{t:"Agacharse",p:"squat",m:"squat"},{t:"Aplaudir",p:"clap",m:"clap"},{t:"Tocar nariz",p:"nose",m:"head"}]
+  [{t:"Tocar nariz",e:"👃",p:"nose",m:"nose"},{t:"Tocar oreja izquierda",e:"👂",p:"earLeft",m:"earLeft"},{t:"Tocar hombro derecho",e:"💪",p:"shoulderRight",m:"shoulderRight"},{t:"Saltar",e:"⬆️",p:"jump",m:"jump"},{t:"Tocar cabeza",e:"🙆",p:"head",m:"head"},{t:"Aplaudir",e:"👏",p:"clap",m:"clap"},{t:"Tocar rodilla",e:"🦵",p:"knee",m:"knee"},{t:"Girar",e:"🔄",p:"spin",m:"spin"}],
+  [{t:"Tocar boca",e:"👄",p:"mouth",m:"mouth"},{t:"Mover cuello",e:"🦒",p:"neck",m:"neck"},{t:"Levantar brazos",e:"🙌",p:"armsUp",m:"armsUp"},{t:"Agacharse",e:"⬇️",p:"squat",m:"squat"},{t:"Tocar oreja derecha",e:"👂",p:"earRight",m:"earRight"},{t:"Tocar nariz",e:"👃",p:"nose",m:"nose"},{t:"Aplaudir",e:"👏",p:"clap",m:"clap"},{t:"Saltar",e:"⬆️",p:"jump",m:"jump"}],
+  [{t:"Tocar oreja izquierda",e:"👂",p:"earLeft",m:"earLeft"},{t:"Levantar brazos",e:"🙌",p:"armsUp",m:"armsUp"},{t:"Tocar rodilla",e:"🦵",p:"knee",m:"knee"},{t:"Saltar",e:"⬆️",p:"jump",m:"jump"},{t:"Tocar boca",e:"👄",p:"mouth",m:"mouth"},{t:"Agacharse",e:"⬇️",p:"squat",m:"squat"},{t:"Aplaudir",e:"👏",p:"clap",m:"clap"},{t:"Tocar nariz",e:"👃",p:"nose",m:"head"}]
 ];
-const objs = ["¡Busca algo de color VERDE y muéstralo!","¡Corre y trae un ZAPATO o tenis!","¡Trae una BOTELLA o vaso reutilizable!"];
+const objs = [
+  "¡Busca algo de color MORADO o NARANJA y muéstralo!",
+  "¡Trae un objeto que tenga RUEDAS o que sirva para MEDIR!",
+  "¡Busca algo que empiece por la letra C y sea REUTILIZABLE!"
+];
 const qs = [
   {q:"¿De qué color es la caneca para residuos aprovechables como plástico, cartón y vidrio limpios?",a:"Color BLANCO."},
   {q:"¿Qué significa la regla de las 3R en el cuidado del medio ambiente?",a:"Reducir, Reutilizar y Reciclar."},
-  {q:"¿En qué caneca se deben depositar las cáscaras de frutas y restos de comida?",a:"En la caneca de color VERDE (residuos orgánicos)."}
+  {q:"¿En qué caneca se depositan las cáscaras de frutas y restos de comida?",a:"En la caneca de color VERDE (residuos orgánicos)."}
+];
+// Rangos de tiempo distintos por ronda antes de parar la música (en milisegundos)
+const musicStops = [
+  () => Math.floor(Math.random() * 2000) + 2000, // Ronda 1: 2 a 4 seg (rápido)
+  () => Math.floor(Math.random() * 3000) + 4500, // Ronda 2: 4.5 a 7.5 seg (medio)
+  () => Math.floor(Math.random() * 4000) + 6500  // Ronda 3: 6.5 a 10.5 seg (largo)
 ];
 let rIdx = 0, sIdx = -1, mInt = null, ctx = null;
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -96,7 +91,7 @@ function startMusic() {
     if (!ctx) return;
     const o = ctx.createOscillator(), g = ctx.createGain();
     o.type = 'triangle'; o.frequency.setValueAtTime(n[i++ % n.length], ctx.currentTime);
-    g.gain.setValueAtTime(0.1, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.28);
+    g.gain.setValueAtTime(0.11, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.28);
     o.connect(g); g.connect(ctx.destination); o.start(); o.stop(ctx.currentTime + 0.28);
   }, 320);
 }
@@ -108,12 +103,12 @@ function speak(txt) {
     window.speechSynthesis.speak(u);
   });
 }
-function showImg(k) {
+function showEmoji(em) {
   document.getElementById('avatar').style.display = 'none';
-  const el = document.getElementById('part-img'); el.style.display = 'block'; el.innerHTML = imgs[k] || imgs.nose;
+  const el = document.getElementById('part-emoji'); el.style.display = 'block'; el.innerText = em;
 }
 function showBot(pose) {
-  document.getElementById('part-img').style.display = 'none';
+  document.getElementById('part-emoji').style.display = 'none';
   const av = document.getElementById('avatar'), al = document.getElementById('arm-l'), ar = document.getElementById('arm-r'), hd = document.getElementById('head');
   av.style.display = 'block'; av.className = ''; al.style.transform = ar.style.transform = hd.style.transform = 'rotate(0deg)';
   if (pose==='nose'||pose==='mouth') ar.style.transform = 'rotate(135deg)';
@@ -140,15 +135,20 @@ async function nextStep() {
   if (sIdx < seq.length) {
     setBtns(false); const act = seq[sIdx], num = sIdx + 1;
     cnt.innerText = 'Parte: ' + num + ' / 8';
-    showImg(act.p);
-    box.innerHTML = '<span>' + act.t + '</span><span class="hint">¡Ahora hazlo tú!</span>';
-    await speak(act.t + ". Ahora hazlo tú.");
-    if (num > 1) box.innerHTML = '<span>' + act.t + '</span><span class="hint">Repite las ' + num + ' partes acumuladas de memoria</span>';
+    showEmoji(act.e);
+    if (num === 1) {
+      box.innerHTML = '<span>' + act.t + '</span><span class="hint">¡Ahora hazlo tú!</span>';
+    if (num === 1) {
+      box.innerHTML = '<span>' + act.t + '</span><span class="hint">¡Ahora hazlo tú!</span>';
+      await speak(act.t + ". Ahora hazlo tú.");
+    } else {
+      box.innerHTML = '<span>' + act.t + '</span><span class="hint">Repite las ' + num + ' partes acumuladas de memoria</span>';
+      await speak(act.t);
+    }
     document.getElementById('b-next').innerText = num === 8 ? "🤖 Repaso Final con el Muñeco" : "➡️ Siguiente Parte";
     setBtns(true);
   } else {
-    document.getElementById('b-next').style.display = 'none';
-    document.getElementById('b-help').style.display = 'none';
+    document.getElementById('b-next').style.display = document.getElementById('b-help').style.display = 'none';
     cnt.innerText = "¡Ronda Completa!";
     showBot('jump');
     if (rIdx === 2) {
@@ -158,17 +158,16 @@ async function nextStep() {
       box.innerHTML = '<span>🤖 ¡Repaso final con el muñeco!</span><span class="hint">Sigue el ritmo...</span>';
       await speak("Excelente. Ahora hazlo junto al muñeco.");
     }
-    await sleep(600);
+    await sleep(500);
     for (let i = 0; i < seq.length; i++) {
       box.innerHTML = '<span>' + (i + 1) + '. ' + seq[i].t + '</span>';
       showBot(seq[i].m); await speak(seq[i].t); await sleep(350);
     }
-    showBot('jump'); box.innerHTML = '<span>🎶 ¡Baila mientras suena la música! 🎶</span>';
-    await sleep(Math.floor(Math.random() * 3000) + 3500);
+    showBot('jump');
+    box.innerHTML = '<span>🎵 ... 🎵</span><span class="hint">¡Atentos a la música!</span>';
+    await sleep(musicStops[rIdx]());
     stopMusic();
-    document.getElementById('avatar').style.display = 'none';
-    const el = document.getElementById('part-img'); el.style.display = 'block';
-    el.innerHTML = '<svg viewBox="0 0 100 100"><text x="50" y="65" font-size="55" text-anchor="middle">🛑</text></svg>';
+    showEmoji("🛑");
     box.innerHTML = '<span style="color:#e74c3c">¡SE PARÓ LA MÚSICA!</span><span class="hint" style="font-size:1.3rem">' + objs[rIdx] + '</span>';
     await speak("¡Alto! " + objs[rIdx]);
     document.getElementById('q-txt').innerText = qs[rIdx].q;
@@ -186,22 +185,20 @@ async function showHelp() {
     box.innerHTML = '<span>' + (i + 1) + '. ' + seq[i].t + '</span><span class="hint">Recordando...</span>';
     showBot(seq[i].p); await speak(seq[i].t); await sleep(300);
   }
-  showImg(seq[sIdx].p);
-  box.innerHTML = '<span>' + seq[sIdx].t + '</span><span class="hint">¡Ahora inténtalo tú!</span>';
+  showEmoji(seq[sIdx].e);
+  box.innerHTML = '<span>' + seq[sIdx].t + '</span><span class="hint">Repite las ' + (sIdx + 1) + ' partes acumuladas de memoria</span>';
   setBtns(true);
 }
 function nextRound() {
   document.getElementById('qa').style.display = 'none'; rIdx++;
-  document.getElementById('avatar').style.display = 'none';
-  const el = document.getElementById('part-img'); el.style.display = 'block';
   if (rIdx < 3) {
-    el.innerHTML = '<svg viewBox="0 0 100 100"><text x="50" y="65" font-size="55" text-anchor="middle">🧠</text></svg>';
+    showEmoji("🧠");
     document.getElementById('r-badge').innerText = 'Ronda ' + (rIdx + 1) + ' de 3';
     document.getElementById('s-count').innerText = 'Parte: 0 / 8';
     document.getElementById('box').innerHTML = '<span>Listos para la Ronda ' + (rIdx + 1) + '</span><span class="hint">Presiona el botón cuando estén preparados</span>';
     const b = document.getElementById('b-start'); b.innerText = '▶️ Iniciar Ronda ' + (rIdx + 1); b.style.display = 'inline-block';
   } else {
-    el.innerHTML = '<svg viewBox="0 0 100 100"><text x="50" y="65" font-size="55" text-anchor="middle">🌍</text></svg>';
+    showEmoji("🌍");
     document.getElementById('r-badge').innerText = "¡Juego Terminado!";
     document.getElementById('s-count').innerText = "Completado";
     document.getElementById('box').innerHTML = '<span>🎉 ¡Felicitaciones a todos!</span><span class="hint">Gracias por cuidar el medio ambiente</span>';
