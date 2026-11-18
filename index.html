@@ -3,206 +3,243 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reto Corporal y Ambiental</title>
+<title>Simón Recicla - Reto Ambiental</title>
 <style>
-  body { font-family: system-ui, sans-serif; background: #1e272e; color: #f5f6fa; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; text-align: center; padding: 15px; }
-  .card { background: #2f3640; border-radius: 20px; padding: 25px; max-width: 560px; width: 100%; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-  .top { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold; }
-  .badge { background: #3498db; padding: 5px 14px; border-radius: 15px; }
-  .step { background: rgba(255,255,255,0.1); padding: 5px 14px; border-radius: 15px; color: #f1c40f; }
-  h1 { color: #2ecc71; font-size: 1.7rem; margin: 10px 0; }
-  .stage { height: 210px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.2); border-radius: 15px; margin: 12px 0; }
-  #part-emoji { font-size: 7.5rem; line-height: 1; user-select: none; }
-  #avatar { width: 180px; height: 200px; display: none; overflow: visible; }
-  #arm-l, #arm-r, #head { transition: transform 0.25s; }
-  .jump { animation: jump 0.45s infinite alternate; }
-  .spin { animation: spin 0.7s ease; }
-  .squat { transform: translateY(25px) scaleY(0.85); }
-  @keyframes jump { from { transform: translateY(0); } to { transform: translateY(-20px); } }
-  @keyframes spin { from { transform: rotateY(0); } to { transform: rotateY(360deg); } }
-  .box { font-size: 1.6rem; font-weight: bold; min-height: 85px; display: flex; flex-direction: column; justify-content: center; background: rgba(0,0,0,0.3); border-radius: 12px; padding: 14px; margin: 12px 0; }
-  .hint { font-size: 1rem; color: #f1c40f; font-weight: normal; margin-top: 6px; }
-  .btns { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
-  button { background: #2ecc71; color: #1e272e; border: none; padding: 13px 22px; font-size: 1.1rem; font-weight: bold; border-radius: 10px; cursor: pointer; }
-  button:disabled { opacity: 0.4; cursor: not-allowed; }
-  .btn-w { background: #f1c40f; }
-  .btn-b { background: #3498db; color: #fff; }
-  #qa { background: #192a56; padding: 18px; border-radius: 15px; border: 2px solid #f1c40f; margin-top: 15px; display: none; }
-  #ans { color: #2ecc71; font-weight: bold; font-size: 1.15rem; margin-top: 10px; display: none; }
+  body { font-family: system-ui, sans-serif; background: #141e27; color: #f5f6fa; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; text-align: center; padding: 15px; }
+  .card { background: #203239; border-radius: 22px; padding: 25px; max-width: 520px; width: 100%; box-shadow: 0 12px 30px rgba(0,0,0,0.6); }
+  .top { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 10px; }
+  .badge { background: #2ecc71; color: #141e27; padding: 6px 14px; border-radius: 15px; }
+  .goal { background: rgba(255,255,255,0.1); padding: 6px 14px; border-radius: 15px; color: #f1c40f; }
+  h1 { margin: 5px 0; font-size: 1.7rem; color: #2ecc71; }
+  #status { font-size: 1.15rem; min-height: 32px; margin: 10px 0 18px; color: #e0ddaa; font-weight: bold; }
+  
+  /* Tablero de 4 Canecas */
+  .board { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; max-width: 360px; margin: 0 auto 20px; }
+  .pad { height: 145px; border-radius: 20px; border: 4px solid rgba(255,255,255,0.15); cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center; font-weight: bold; transition: transform 0.1s, filter 0.15s, box-shadow 0.15s; user-select: none; opacity: 0.72; }
+  .pad:active:not(.locked) { transform: scale(0.95); }
+  .pad.locked { cursor: not-allowed; }
+  .pad span { font-size: 2.2rem; margin-bottom: 5px; }
+  .pad small { font-size: 0.8rem; opacity: 0.9; }
+
+  .green { background: #27ae60; color: #fff; }
+  .white { background: #ecf0f1; color: #2c3e50; }
+  .black { background: #2c3e50; color: #fff; border-color: #7f8c8d; }
+  .red { background: #c0392b; color: #fff; }
+
+  /* Efecto encendido */
+  .pad.lit { opacity: 1; transform: scale(1.05); filter: brightness(1.3); box-shadow: 0 0 25px rgba(255,255,255,0.8); z-index: 2; }
+
+  button.main-btn { background: #2ecc71; color: #141e27; border: none; padding: 14px 28px; font-size: 1.15rem; font-weight: bold; border-radius: 12px; cursor: pointer; margin-top: 5px; }
+  button.main-btn:hover { transform: scale(1.03); }
+
+  /* Modal de Penitencia */
+  #penalty-box { background: #2c1618; border: 2px solid #e74c3c; border-radius: 16px; padding: 18px; margin-top: 15px; display: none; text-align: left; }
+  #penalty-box h3 { color: #ff7675; margin: 0 0 10px; text-align: center; }
+  .p-item { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 10px; margin-bottom: 10px; }
+  .p-label { font-size: 0.85rem; color: #f1c40f; font-weight: bold; text-transform: uppercase; }
+  .p-text { font-size: 1.05rem; margin: 4px 0 0; }
+  #ans-box { color: #2ecc71; font-weight: bold; margin-top: 8px; display: none; }
+  .btn-sm { background: #3498db; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 8px; }
 </style>
 </head>
 <body>
 <div class="card">
-  <div class="top"><span class="badge" id="r-badge">Ronda 1 de 3</span><span class="step" id="s-count">Parte: 0 / 8</span></div>
-  <h1>Escucha, Memoriza y Actúa</h1>
-  <div class="stage">
-    <div id="part-emoji">🧠</div>
-    <svg id="avatar" viewBox="0 0 200 240">
-      <rect x="70" y="80" width="60" height="80" rx="15" fill="#3498db"/>
-      <g id="head" style="transform-origin:100px 75px"><circle cx="100" cy="45" r="30" fill="#f1c40f"/><circle cx="68" cy="45" r="7" fill="#e67e22"/><circle cx="132" cy="45" r="7" fill="#e67e22"/><circle cx="90" cy="40" r="4" fill="#2c3e50"/><circle cx="110" cy="40" r="4" fill="#2c3e50"/><circle cx="100" cy="48" r="4" fill="#e74c3c"/><path d="M90 58 Q100 65 110 58" stroke="#2c3e50" stroke-width="3" fill="none"/></g>
-      <g id="arm-l" style="transform-origin:65px 90px"><rect x="45" y="85" width="20" height="60" rx="10" fill="#f1c40f"/></g>
-      <g id="arm-r" style="transform-origin:135px 90px"><rect x="135" y="85" width="20" height="60" rx="10" fill="#f1c40f"/></g>
-      <rect x="75" y="160" width="20" height="60" rx="10" fill="#2980b9"/><rect x="105" y="160" width="20" height="60" rx="10" fill="#2980b9"/>
-    </svg>
+  <div class="top">
+    <span class="badge" id="r-badge">Ronda 1 de 3</span>
+    <span class="goal" id="g-badge">Meta: 0 / 6</span>
   </div>
-  <div class="box" id="box"><span>Presiona iniciar para comenzar</span><span class="hint">La música sonará durante toda la ronda</span></div>
-  <div class="btns">
-    <button id="b-start" onclick="startRound()">▶️ Iniciar Ronda 1</button>
-    <button id="b-next" onclick="nextStep()" style="display:none">➡️ Siguiente Parte</button>
-    <button id="b-help" class="btn-w" onclick="showHelp()" style="display:none">🆘 No me acuerdo</button>
+  <h1>♻️ Simón Recicla</h1>
+  <div id="status">Presiona Iniciar para ver la secuencia</div>
+
+  <div class="board">
+    <div class="pad green locked" id="pad-0" onclick="playerClick(0)"><span>🍃</span>VERDE<small>Orgánicos</small></div>
+    <div class="pad white locked" id="pad-1" onclick="playerClick(1)"><span>🧴</span>BLANCO<small>Aprovechables</small></div>
+    <div class="pad black locked" id="pad-2" onclick="playerClick(2)"><span>🗑️</span>NEGRO<small>No aprovechables</small></div>
+    <div class="pad red locked" id="pad-3" onclick="playerClick(3)"><span>🔋</span>ROJO<small>Peligrosos</small></div>
   </div>
-  <div id="qa">
-    <h3 style="color:#f1c40f;margin:0 0 10px">🌍 Pregunta para el último en traer el objeto:</h3>
-    <p id="q-txt" style="font-size:1.2rem"></p>
-    <button class="btn-b" onclick="document.getElementById('ans').style.display='block'">👁️ Ver Respuesta</button>
-    <p id="ans"></p><br>
-    <button id="b-round" onclick="nextRound()">Siguiente Ronda ➡️</button>
+
+  <button class="main-btn" id="btn-start" onclick="startRound()">▶️ Iniciar Ronda 1</button>
+
+  <!-- Tarjeta de Penitencia Doble -->
+  <div id="penalty-box">
+    <h3>🚨 ¡Te equivocaste! Cumple la penitencia</h3>
+    <div class="p-item">
+      <div class="p-label">🏃 1. Reto Corporal</div>
+      <div class="p-text" id="body-challenge"></div>
+    </div>
+    <div class="p-item">
+      <div class="p-label">🌍 2. Pregunta Ambiental</div>
+      <div class="p-text" id="env-q"></div>
+      <button class="btn-sm" onclick="document.getElementById('ans-box').style.display='block'">👁️ Ver Respuesta</button>
+      <div id="ans-box"></div>
+    </div>
+    <div style="text-align:center;">
+      <button class="main-btn" onclick="retryRound()">🔄 Ya cumplí, reintentar ronda</button>
+    </div>
   </div>
 </div>
+
 <script>
-const rounds = [
-  [{t:"Tocar nariz",e:"👃",p:"nose",m:"nose"},{t:"Tocar oreja izquierda",e:"👂",p:"earLeft",m:"earLeft"},{t:"Tocar hombro derecho",e:"💪",p:"shoulderRight",m:"shoulderRight"},{t:"Saltar",e:"⬆️",p:"jump",m:"jump"},{t:"Tocar cabeza",e:"🙆",p:"head",m:"head"},{t:"Aplaudir",e:"👏",p:"clap",m:"clap"},{t:"Tocar rodilla",e:"🦵",p:"knee",m:"knee"},{t:"Girar",e:"🔄",p:"spin",m:"spin"}],
-  [{t:"Tocar boca",e:"👄",p:"mouth",m:"mouth"},{t:"Mover cuello",e:"🦒",p:"neck",m:"neck"},{t:"Levantar brazos",e:"🙌",p:"armsUp",m:"armsUp"},{t:"Agacharse",e:"⬇️",p:"squat",m:"squat"},{t:"Tocar oreja derecha",e:"👂",p:"earRight",m:"earRight"},{t:"Tocar nariz",e:"👃",p:"nose",m:"nose"},{t:"Aplaudir",e:"👏",p:"clap",m:"clap"},{t:"Saltar",e:"⬆️",p:"jump",m:"jump"}],
-  [{t:"Tocar oreja izquierda",e:"👂",p:"earLeft",m:"earLeft"},{t:"Levantar brazos",e:"🙌",p:"armsUp",m:"armsUp"},{t:"Tocar rodilla",e:"🦵",p:"knee",m:"knee"},{t:"Saltar",e:"⬆️",p:"jump",m:"jump"},{t:"Tocar boca",e:"👄",p:"mouth",m:"mouth"},{t:"Agacharse",e:"⬇️",p:"squat",m:"squat"},{t:"Aplaudir",e:"👏",p:"clap",m:"clap"},{t:"Tocar nariz",e:"👃",p:"nose",m:"head"}]
+const roundGoals =; // Límites por ronda: 6, 8 y 10 colores
+const roundSpeeds =; // Velocidad en ms por ronda
+const freqs = [261.63, 329.63, 392.00, 523.25]; // Notas musicales Do, Mi, Sol, Do alto
+
+const bodyPenalties = [
+  "¡Salta 3 veces tocando tus rodillas en el aire!",
+  "¡Haz 5 sentadillas manteniendo los brazos estirados al frente!",
+  "¡Mantén el equilibrio en un solo pie durante 8 segundos!",
+  "¡Toca el suelo con ambas manos y da un salto alto 3 veces!",
+  "¡Gira 2 veces sobre tu eje y haz 4 aplausos arriba de la cabeza!",
+  "¡Camina en el puesto levantando las rodillas al pecho por 6 segundos!"
 ];
-const objs = [
-  "¡Busca algo de color MORADO o NARANJA y muéstralo!",
-  "¡Trae un objeto que tenga RUEDAS o que sirva para MEDIR!",
-  "¡Busca algo que empiece por la letra C y sea REUTILIZABLE!"
+
+const hardEnvQuestions = [
+  { q: "¿Cuántos litros de agua dulce puede contaminar una sola pila de botón (de reloj) si llega a una fuente hídrica?", a: "Hasta 600.000 litros de agua (por el mercurio y metales pesados)." },
+  { q: "¿Qué es la 'huella hídrica gris' de un producto?", a: "Es el volumen de agua dulce necesario para diluir los contaminantes generados durante su fabricación." },
+  { q: "¿Por qué las cajas de pizza engrasadas NO deben ir en la caneca blanca de cartón limpio?", a: "Porque la grasa contamina las fibras de celulosa e impide que la pulpa de papel se pueda reciclar." },
+  { q: "¿Aproximadamente cuánto tiempo tarda en degradarse una colilla de cigarrillo en el ambiente?", a: "Entre 10 y 12 años, ya que su filtro está hecho de acetato de celulosa (un plástico)." },
+  { q: "¿Qué gas de efecto invernadero produce la basura orgánica cuando se descompone sin oxígeno en un relleno sanitario?", a: "Gas metano (CH4), que retiene hasta 28 veces más calor que el CO2." },
+  { q: "¿Qué significa que un plástico sea 'oxodegradable' y por qué muchos países lo han prohibido?", a: "Se fragmenta rápidamente en microplásticos invisibles pero no desaparece ni se biodegrada realmente." }
 ];
-const qs = [
-  {q:"¿De qué color es la caneca para residuos aprovechables como plástico, cartón y vidrio limpios?",a:"Color BLANCO."},
-  {q:"¿Qué significa la regla de las 3R en el cuidado del medio ambiente?",a:"Reducir, Reutilizar y Reciclar."},
-  {q:"¿En qué caneca se depositan las cáscaras de frutas y restos de comida?",a:"En la caneca de color VERDE (residuos orgánicos)."}
-];
-// Rangos de tiempo distintos por ronda antes de parar la música (en milisegundos)
-const musicStops = [
-  () => Math.floor(Math.random() * 2000) + 2000, // Ronda 1: 2 a 4 seg (rápido)
-  () => Math.floor(Math.random() * 3000) + 4500, // Ronda 2: 4.5 a 7.5 seg (medio)
-  () => Math.floor(Math.random() * 4000) + 6500  // Ronda 3: 6.5 a 10.5 seg (largo)
-];
-let rIdx = 0, sIdx = -1, mInt = null, ctx = null;
+
+let rIdx = 0;
+let sequence = [];
+let playerIdx = 0;
+let isLocked = true;
+let pIdx = 0;
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-function startMusic() {
-  if (ctx) return;
-  ctx = new (window.AudioContext || window.webkitAudioContext)();
-  const n = [130.8,164.8,196,164.8,146.8,174.6,220,196]; let i = 0;
-  mInt = setInterval(() => {
-    if (!ctx) return;
-    const o = ctx.createOscillator(), g = ctx.createGain();
-    o.type = 'triangle'; o.frequency.setValueAtTime(n[i++ % n.length], ctx.currentTime);
-    g.gain.setValueAtTime(0.11, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.28);
-    o.connect(g); g.connect(ctx.destination); o.start(); o.stop(ctx.currentTime + 0.28);
-  }, 320);
+
+function playTone(idx, duration = 250, isError = false) {
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = isError ? 'sawtooth' : 'sine';
+  osc.frequency.setValueAtTime(isError ? 110 : freqs[idx], audioCtx.currentTime);
+  gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration / 1000);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + duration / 1000);
 }
-function stopMusic() { if (mInt) { clearInterval(mInt); mInt = null; } if (ctx) { ctx.close(); ctx = null; } }
-function speak(txt) {
-  return new Promise(res => {
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(txt); u.lang = 'es-ES'; u.rate = 1.05; u.onend = res;
-    window.speechSynthesis.speak(u);
-  });
+
+function setPadsLocked(lock) {
+  isLocked = lock;
+  for (let i = 0; i < 4; i++) {
+    document.getElementById('pad-' + i).classList.toggle('locked', lock);
+  }
 }
-function showEmoji(em) {
-  document.getElementById('avatar').style.display = 'none';
-  const el = document.getElementById('part-emoji'); el.style.display = 'block'; el.innerText = em;
+
+async function flashPad(idx, speed) {
+  const pad = document.getElementById('pad-' + idx);
+  pad.classList.add('lit');
+  playTone(idx, speed * 0.8);
+  await sleep(speed * 0.75);
+  pad.classList.remove('lit');
+  await sleep(speed * 0.25);
 }
-function showBot(pose) {
-  document.getElementById('part-emoji').style.display = 'none';
-  const av = document.getElementById('avatar'), al = document.getElementById('arm-l'), ar = document.getElementById('arm-r'), hd = document.getElementById('head');
-  av.style.display = 'block'; av.className = ''; al.style.transform = ar.style.transform = hd.style.transform = 'rotate(0deg)';
-  if (pose==='nose'||pose==='mouth') ar.style.transform = 'rotate(135deg)';
-  else if (pose==='earLeft') al.style.transform = 'rotate(-145deg)';
-  else if (pose==='earRight') ar.style.transform = 'rotate(145deg)';
-  else if (pose==='head') { al.style.transform = 'rotate(-160deg)'; ar.style.transform = 'rotate(160deg)'; }
-  else if (pose==='shoulderRight') al.style.transform = 'rotate(-90deg)';
-  else if (pose==='armsUp') { al.style.transform = 'rotate(-170deg)'; ar.style.transform = 'rotate(170deg)'; }
-  else if (pose==='clap') { al.style.transform = 'rotate(-70deg)'; ar.style.transform = 'rotate(70deg)'; }
-  else if (pose==='knee') { al.style.transform = 'rotate(-30deg)'; ar.style.transform = 'rotate(30deg)'; av.classList.add('squat'); }
-  else if (pose==='squat') av.classList.add('squat');
-  else if (pose==='jump') av.classList.add('jump');
-  else if (pose==='spin') av.classList.add('spin');
-  else if (pose==='neck') hd.style.transform = 'rotate(20deg)';
-}
-function setBtns(on) { document.getElementById('b-next').disabled = document.getElementById('b-help').disabled = !on; }
+
 function startRound() {
-  document.getElementById('b-start').style.display = 'none';
-  document.getElementById('b-next').style.display = document.getElementById('b-help').style.display = 'inline-block';
-  sIdx = -1; startMusic(); nextStep();
+  document.getElementById('btn-start').style.display = 'none';
+  document.getElementById('penalty-box').style.display = 'none';
+  sequence = [];
+  updateHeader();
+  nextTurn();
 }
-async function nextStep() {
-  sIdx++; const seq = rounds[rIdx], box = document.getElementById('box'), cnt = document.getElementById('s-count');
-  if (sIdx < seq.length) {
-    setBtns(false); const act = seq[sIdx], num = sIdx + 1;
-    cnt.innerText = 'Parte: ' + num + ' / 8';
-    showEmoji(act.e);
-    if (num === 1) {
-      box.innerHTML = '<span>' + act.t + '</span><span class="hint">¡Ahora hazlo tú!</span>';
-    if (num === 1) {
-      box.innerHTML = '<span>' + act.t + '</span><span class="hint">¡Ahora hazlo tú!</span>';
-      await speak(act.t + ". Ahora hazlo tú.");
-    } else {
-      box.innerHTML = '<span>' + act.t + '</span><span class="hint">Repite las ' + num + ' partes acumuladas de memoria</span>';
-      await speak(act.t);
+
+function updateHeader() {
+  document.getElementById('r-badge').innerText = `Ronda ${rIdx + 1} de 3`;
+  document.getElementById('g-badge').innerText = `Meta: ${sequence.length} / ${roundGoals[rIdx]}`;
+}
+
+async function nextTurn() {
+  setPadsLocked(true);
+  playerIdx = 0;
+  // Agrega un color aleatorio (0 a 3)
+  sequence.push(Math.floor(Math.random() * 4));
+  updateHeader();
+  
+  document.getElementById('status').innerText = "👀 Observa y memoriza la secuencia...";
+  await sleep(700);
+
+  const speed = roundSpeeds[rIdx];
+  for (let i = 0; i < sequence.length; i++) {
+    await flashPad(sequence[i], speed);
+  }
+
+  document.getElementById('status').innerText = `👉 ¡Tu turno! Repite los ${sequence.length} colores`;
+  setPadsLocked(false);
+}
+
+async function playerClick(idx) {
+  if (isLocked) return;
+  
+  // Ilumina brevemente al tocar
+  const pad = document.getElementById('pad-' + idx);
+  pad.classList.add('lit');
+  setTimeout(() => pad.classList.remove('lit'), 180);
+
+  // Verifica si acertó
+  if (idx === sequence[playerIdx]) {
+    playTone(idx, 200);
+    playerIdx++;
+
+    // Completó la secuencia actual
+    if (playerIdx === sequence.length) {
+      setPadsLocked(true);
+      // ¿Llegó al límite de la ronda (6, 8 o 10)?
+      if (sequence.length === roundGoals[rIdx]) {
+        await sleep(400);
+        finishRound();
+      } else {
+        document.getElementById('status').innerText = "✅ ¡Bien! Agregando un color más...";
+        await sleep(800);
+        nextTurn();
+      }
     }
-    document.getElementById('b-next').innerText = num === 8 ? "🤖 Repaso Final con el Muñeco" : "➡️ Siguiente Parte";
-    setBtns(true);
   } else {
-    document.getElementById('b-next').style.display = document.getElementById('b-help').style.display = 'none';
-    cnt.innerText = "¡Ronda Completa!";
-    showBot('jump');
-    if (rIdx === 2) {
-      box.innerHTML = '<span>⚠️ ¡ATENCIÓN AL MUÑECO! ⚠️</span><span class="hint">No mires lo que hace, ¡ESCUCHA lo que dice!</span>';
-      await speak("Atención al muñeco. No mires lo que hace, escucha lo que dice.");
-    } else {
-      box.innerHTML = '<span>🤖 ¡Repaso final con el muñeco!</span><span class="hint">Sigue el ritmo...</span>';
-      await speak("Excelente. Ahora hazlo junto al muñeco.");
-    }
-    await sleep(500);
-    for (let i = 0; i < seq.length; i++) {
-      box.innerHTML = '<span>' + (i + 1) + '. ' + seq[i].t + '</span>';
-      showBot(seq[i].m); await speak(seq[i].t); await sleep(350);
-    }
-    showBot('jump');
-    box.innerHTML = '<span>🎵 ... 🎵</span><span class="hint">¡Atentos a la música!</span>';
-    await sleep(musicStops[rIdx]());
-    stopMusic();
-    showEmoji("🛑");
-    box.innerHTML = '<span style="color:#e74c3c">¡SE PARÓ LA MÚSICA!</span><span class="hint" style="font-size:1.3rem">' + objs[rIdx] + '</span>';
-    await speak("¡Alto! " + objs[rIdx]);
-    document.getElementById('q-txt').innerText = qs[rIdx].q;
-    document.getElementById('ans').innerText = "✅ Respuesta: " + qs[rIdx].a;
-    document.getElementById('ans').style.display = 'none';
-    if (rIdx === 2) document.getElementById('b-round').innerText = "Finalizar Juego 🏆";
-    document.getElementById('qa').style.display = 'block';
+    // SE EQUIVOCÓ: Activa penitencia
+    setPadsLocked(true);
+    playTone(0, 600, true);
+    document.getElementById('status').innerText = "❌ ¡Color incorrecto!";
+    triggerPenalty();
   }
 }
-async function showHelp() {
-  setBtns(false); const seq = rounds[rIdx], box = document.getElementById('box');
-  box.innerHTML = '<span>🤖 ¡Yo te recuerdo el orden!</span><span class="hint">Mira y escucha...</span>';
-  showBot('jump'); await speak("Mira y escucha el orden hasta el momento:");
-  for (let i = 0; i <= sIdx; i++) {
-    box.innerHTML = '<span>' + (i + 1) + '. ' + seq[i].t + '</span><span class="hint">Recordando...</span>';
-    showBot(seq[i].p); await speak(seq[i].t); await sleep(300);
-  }
-  showEmoji(seq[sIdx].e);
-  box.innerHTML = '<span>' + seq[sIdx].t + '</span><span class="hint">Repite las ' + (sIdx + 1) + ' partes acumuladas de memoria</span>';
-  setBtns(true);
+
+function triggerPenalty() {
+  const bChal = bodyPenalties[pIdx % bodyPenalties.length];
+  const eQues = hardEnvQuestions[pIdx % hardEnvQuestions.length];
+  pIdx++;
+
+  document.getElementById('body-challenge').innerText = bChal;
+  document.getElementById('env-q').innerText = eQues.q;
+  document.getElementById('ans-box').innerText = "✅ Respuesta: " + eQues.a;
+  document.getElementById('ans-box').style.display = 'none';
+  document.getElementById('penalty-box').style.display = 'block';
 }
-function nextRound() {
-  document.getElementById('qa').style.display = 'none'; rIdx++;
+
+function retryRound() {
+  document.getElementById('penalty-box').style.display = 'none';
+  sequence = [];
+  updateHeader();
+  nextTurn();
+}
+
+function finishRound() {
+  rIdx++;
   if (rIdx < 3) {
-    showEmoji("🧠");
-    document.getElementById('r-badge').innerText = 'Ronda ' + (rIdx + 1) + ' de 3';
-    document.getElementById('s-count').innerText = 'Parte: 0 / 8';
-    document.getElementById('box').innerHTML = '<span>Listos para la Ronda ' + (rIdx + 1) + '</span><span class="hint">Presiona el botón cuando estén preparados</span>';
-    const b = document.getElementById('b-start'); b.innerText = '▶️ Iniciar Ronda ' + (rIdx + 1); b.style.display = 'inline-block';
+    document.getElementById('status').innerText = `🎉 ¡Superaste la Ronda ${rIdx}! Prepárate para la siguiente.`;
+    const btn = document.getElementById('btn-start');
+    btn.innerText = `▶️ Iniciar Ronda ${rIdx + 1} (Meta: ${roundGoals[rIdx]} colores)`;
+    btn.style.display = 'inline-block';
   } else {
-    showEmoji("🌍");
-    document.getElementById('r-badge').innerText = "¡Juego Terminado!";
-    document.getElementById('s-count').innerText = "Completado";
-    document.getElementById('box').innerHTML = '<span>🎉 ¡Felicitaciones a todos!</span><span class="hint">Gracias por cuidar el medio ambiente</span>';
-    speak("Felicitaciones a todos. Gracias por jugar y cuidar el medio ambiente.");
+    document.getElementById('r-badge').innerText = "🏆 ¡Campeón Ambiental!";
+    document.getElementById('status').innerText = "🌍 ¡Completaste las 3 rondas de reciclaje y memoria!";
+    const btn = document.getElementById('btn-start');
+    btn.innerText = "🔄 Volver a Jugar desde Ronda 1";
+    btn.style.display = 'inline-block';
+    rIdx = 0;
   }
 }
 </script>
