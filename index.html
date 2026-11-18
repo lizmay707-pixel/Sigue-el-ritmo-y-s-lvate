@@ -85,17 +85,13 @@ const roundSpeeds = new Array(650, 500, 380);
 const freqs = [261.63, 329.63, 392.00, 523.25]; // Notas musicales Do, Mi, Sol, Do alto
 
 const bodyPenalties = [
-  "¡Salta 3 veces tocando tus rodillas en el aire!",
   "¡Haz 5 sentadillas manteniendo los brazos estirados al frente!",
   "¡Mantén el equilibrio en un solo pie durante 8 segundos!",
   "¡Toca el suelo con ambas manos y da un salto alto 3 veces!",
   "¡Gira 2 veces sobre tu eje y haz 4 aplausos arriba de la cabeza!",
-  "¡Camina en el puesto levantando las rodillas al pecho por 6 segundos!"
 ];
 
 const hardEnvQuestions = [
-  { q: "¿Cuántos litros de agua dulce puede contaminar una sola pila de botón (de reloj) si llega a una fuente hídrica?", a: "Hasta 600.000 litros de agua (por el mercurio y metales pesados)." },
-  { q: "¿Qué es la 'huella hídrica gris' de un producto?", a: "Es el volumen de agua dulce necesario para diluir los contaminantes generados durante su fabricación." },
   { q: "¿Por qué las cajas de pizza engrasadas NO deben ir en la caneca blanca de cartón limpio?", a: "Porque la grasa contamina las fibras de celulosa e impide que la pulpa de papel se pueda reciclar." },
   { q: "¿Aproximadamente cuánto tiempo tarda en degradarse una colilla de cigarrillo en el ambiente?", a: "Entre 10 y 12 años, ya que su filtro está hecho de acetato de celulosa (un plástico)." },
   { q: "¿Qué gas de efecto invernadero produce la basura orgánica cuando se descompone sin oxígeno en un relleno sanitario?", a: "Gas metano (CH4), que retiene hasta 28 veces más calor que el CO2." },
@@ -156,19 +152,24 @@ function updateHeader() {
 async function nextTurn() {
   setPadsLocked(true);
   playerIdx = 0;
-  // Agrega un color aleatorio (0 a 3)
-  sequence.push(Math.floor(Math.random() * 4));
+  
+  // Agrega un color nuevo aleatorio (0 a 3)
+  const newColor = Math.floor(Math.random() * 4);
+  sequence.push(newColor);
   updateHeader();
   
-  document.getElementById('status').innerText = "👀 Observa y memoriza la secuencia...";
-  await sleep(700);
+  document.getElementById('status').innerText = "👀 Memoriza el NUEVO color...";
+  await sleep(600);
 
+  // Ilumina ÚNICAMENTE el color nuevo, sin repetir los anteriores
   const speed = roundSpeeds[rIdx];
-  for (let i = 0; i < sequence.length; i++) {
-    await flashPad(sequence[i], speed);
-  }
+  await flashPad(newColor, speed);
 
-  document.getElementById('status').innerText = `👉 ¡Tu turno! Repite los ${sequence.length} colores`;
+  if (sequence.length === 1) {
+    document.getElementById('status').innerText = "👉 ¡Toca el primer color!";
+  } else {
+    document.getElementById('status').innerText = `🧠 ¡Repite los ${sequence.length} colores en orden desde el inicio!`;
+  }
   setPadsLocked(false);
 }
 
